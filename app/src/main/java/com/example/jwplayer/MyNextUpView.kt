@@ -1,5 +1,6 @@
 package com.example.jwplayer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
@@ -37,6 +38,7 @@ class MyNextUpView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         close = findViewById(R.id.next_close)
     }
 
+    @SuppressLint("SetTextI18n")
     fun bind(nextUpViewModel: NextUpViewModel, lifecycleOwner: LifecycleOwner?) {
         nextUpViewModel.thumbnailUrl.observe(lifecycleOwner!!) { url: String? ->
             Picasso.get().load(url).into(poster)
