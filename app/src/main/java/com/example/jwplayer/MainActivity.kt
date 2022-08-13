@@ -13,6 +13,7 @@ import com.jwplayer.pub.api.configuration.UiConfig
 import com.jwplayer.pub.api.events.EventType
 import com.jwplayer.pub.api.events.FullscreenEvent
 import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents
+import com.jwplayer.pub.api.license.LicenseUtil
 import com.jwplayer.pub.view.JWPlayerView
 
 class MainActivity : AppCompatActivity() , VideoPlayerEvents.OnFullscreenListener {
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() , VideoPlayerEvents.OnFullscreenListene
 
         WebView.setWebContentsDebuggingEnabled(true)
         // TODO: Add your license key
-        //new LicenseUtil().setLicenseKey(this, YOUR_LICENSE_KEY);
+        LicenseUtil().setLicenseKey(this, "OwyAxwyK8E//wkcI5SlH3MIBOqrcNP8P3YI3SKFF5zMdhshU")
         mPlayerView = findViewById(R.id.jwplayer)
         mPlayerView?.getPlayerAsync(this, this,
             JWPlayer.PlayerInitializationListener { jwPlayer: JWPlayer? ->
