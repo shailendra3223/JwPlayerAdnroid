@@ -46,5 +46,7 @@ dependencies {
 
     implementation 'com.jwplayer:jwplayer-core:4.5.0'
     implementation 'com.jwplayer:jwplayer-common:4.5.0'
+    implementation "com.jwplayer:jwplayer-chromecast:4.5.0"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
 }
