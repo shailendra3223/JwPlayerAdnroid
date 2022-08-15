@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         mPlayerView?.getPlayerAsync(this, this,
             JWPlayer.PlayerInitializationListener { jwPlayer: JWPlayer? ->
                 mPlayer = jwPlayer
+                mPlayer!!.setFullscreenHandler(FullScreenHandlerNoRotation(mPlayerView!!))
                 setupPlayer1()
             })
         mScaleGestureDetector = ScaleGestureDetector(this, ScaleListener())
@@ -82,6 +83,9 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     private fun setupPlayer1() {
         // Handle hiding/showing of ActionBar
         mPlayer!!.addListener(EventType.FULLSCREEN, this@MainActivity)
+//        mPlayer!!.setPlaylistItemCallbackListener { playlistItemDecision, playlistItem, i ->
+//            Log.i("TAGvv", "setupPlayer9: ${ i}")
+//        }
 
         // Keep the screen on during playback
         KeepScreenOnHandler(mPlayer!!, window)
@@ -100,24 +104,22 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
             captionList.add(caption)
 
             val pi = PlaylistItem.Builder()
+                .description(episode.description)
                 .file(episode.media)
                 .image(episode.original_thumbnail_file)
-                .title(episode.title)
                 .tracks(captionList)
+                .title(episode.title)
                 .build()
-
 
             playlist.add(pi)
         }
 
 
-        // Load a media source
-
-        // Load a media source
-
-
         val playerConfig = PlayerConfig.Builder()
             .playlist(playlist)
+            .uiConfig(UiConfig.Builder()
+                    .displayAllControls()
+                    .build())
             .build()
 
         mPlayer!!.setup(playerConfig)
@@ -136,14 +138,14 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //            .stretching(PlayerConfig.STRETCHING_FILL)
             .build()
         mPlayer!!.setup(config)*/
-        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
+        /*val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
         val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bind(mPlayer!!, this)
+        controls.bind(mPlayer!!, this)*/
     }
 
     class ScaleListener : ScaleGestureDetector.OnScaleGestureListener {
