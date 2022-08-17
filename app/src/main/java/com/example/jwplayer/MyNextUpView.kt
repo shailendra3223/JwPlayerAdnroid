@@ -9,6 +9,19 @@ import android.widget.TextView
 import com.google.android.material.imageview.ShapeableImageView
 import com.example.jwplayer.R
 import com.jwplayer.pub.ui.viewmodels.NextUpViewModel
+import com.jwplayer.pub.ui.viewmodels.OverlayViewModel
+import com.jwplayer.pub.ui.viewmodels.SettingsMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.PlaybackRatesMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.QualityLevelMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.AudiotracksMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.CaptionsMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
+import com.jwplayer.pub.ui.viewmodels.ControlbarViewModel
+import com.jwplayer.pub.ui.viewmodels.ControlsContainerViewModel
+import com.jwplayer.pub.ui.viewmodels.ChaptersViewModel
+import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
+
+
 import androidx.lifecycle.LifecycleOwner
 import com.squareup.picasso.Picasso
 

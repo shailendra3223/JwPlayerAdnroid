@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">JwPlayer</string>
+    <string name="video_setting">Video Setting</string>
+    <string name="episodes">Episodes</string>
 </resources>

@@ -29,7 +29,6 @@ import com.jwplayer.pub.api.media.captions.Caption
 import com.jwplayer.pub.api.media.captions.CaptionType
 import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.view.JWPlayerView
-import java.util.*
 
 
 class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener,
@@ -118,8 +117,14 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         val playerConfig = PlayerConfig.Builder()
             .playlist(playlist)
             .uiConfig(UiConfig.Builder()
-                    .displayAllControls()
-                    .build())
+
+                .displayAllControls()
+                .hide(UiGroup.SETTINGS_MENU)
+//                .show(UiGroup.SETTINGS_AUDIOTRACKS_SUBMENU)
+                .hide(UiGroup.SETTINGS_PLAYBACK_SUBMENU)
+                .hide(UiGroup.SETTINGS_QUALITY_SUBMENU)
+                .build())
+
             .build()
 
         mPlayer!!.setup(playerConfig)
@@ -138,14 +143,23 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //            .stretching(PlayerConfig.STRETCHING_FILL)
             .build()
         mPlayer!!.setup(config)*/
-        /*val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
+        val controls = MyControlPan(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_ActionBar))
         val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bind(mPlayer!!, this)*/
+        controls.bindSettingPan(mPlayer!!, UiGroup.SETTINGS_MENU,this)
+
+//        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
+//        val params = FrameLayout.LayoutParams(
+//            ViewGroup.LayoutParams.MATCH_PARENT,
+//            ViewGroup.LayoutParams.MATCH_PARENT
+//        )
+//        controls.layoutParams = params
+//        mPlayerView!!.addView(controls)
+//        controls.bind(mPlayer!!, this)
     }
 
     class ScaleListener : ScaleGestureDetector.OnScaleGestureListener {

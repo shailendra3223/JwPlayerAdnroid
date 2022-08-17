@@ -27,7 +27,7 @@ class MyControls(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 
     private fun initView(context: Context?) {
         inflate(context, R.layout.view_my_controls, this)
-        nextUpView = findViewById(R.id.my_next_up)
+        nextUpView = findViewById(R.id.my_next_up1)
     }
 
     fun bind(player: JWPlayer, lifecycleOwner: LifecycleOwner?) {
