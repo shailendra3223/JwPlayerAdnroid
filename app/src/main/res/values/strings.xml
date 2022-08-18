@@ -2,4 +2,7 @@
     <string name="app_name">JwPlayer</string>
     <string name="video_setting">Video Setting</string>
     <string name="episodes">Episodes</string>
+    <string name="subtitles_amp_audio"><![CDATA[Subtitles & Audio]]></string>
+    <string name="play_rate">Play Rate</string>
+    <string name="quality_level">Quality Level</string>
 </resources>

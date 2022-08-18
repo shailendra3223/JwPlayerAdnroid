@@ -31,11 +31,10 @@ import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.view.JWPlayerView
 
 
-class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener,
-    View.OnTouchListener {
+class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener {
     var mPlayerView: JWPlayerView? = null
     private var mPlayer: JWPlayer? = null
-    var mScaleGestureDetector: ScaleGestureDetector? = null
+
     var mScaleFactor = 1.0f
     private var mCastContext: CastContext? = null
     private val GOOGLE_PLAY_STORE_PACKAGE_NAME_OLD = "com.google.market"
@@ -55,8 +54,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
                 mPlayer!!.setFullscreenHandler(FullScreenHandlerNoRotation(mPlayerView!!))
                 setupPlayer1()
             })
-        mScaleGestureDetector = ScaleGestureDetector(this, ScaleListener())
-        mPlayerView!!.setOnTouchListener(this)
+
         mPlayerView!!.setOnClickListener {
             Log.i("fsdhgfshgfdshsd555", "onScale: ${MainActivity().mScaleFactor}")
         }
@@ -67,16 +65,6 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         }
 
 //        mPlayerView!!.onTouchEvent(MotionEvent.ACTION_MASK)
-    }
-
-
-    override fun onTouch(view: View?, event: MotionEvent?): Boolean {
-        Log.i("fsdhgfshgfdshsd4", "onScale: ${MainActivity().mScaleFactor}")
-
-        if (event!!.action == MotionEvent.ACTION_MASK) {
-            return mScaleGestureDetector!!.onTouchEvent(event)
-        }
-        return false
     }
 
     private fun setupPlayer1() {
@@ -113,18 +101,20 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
             playlist.add(pi)
         }
 
-
-        val playerConfig = PlayerConfig.Builder()
+        var playerConfig = PlayerConfig.Builder()
             .playlist(playlist)
+            .autostart(true)
             .uiConfig(UiConfig.Builder()
-
                 .displayAllControls()
-                .hide(UiGroup.SETTINGS_MENU)
-//                .show(UiGroup.SETTINGS_AUDIOTRACKS_SUBMENU)
+                .hide(UiGroup.CASTING_MENU)
+                .hide(UiGroup.CONTROLBAR)
+                .hide(UiGroup.CENTER_CONTROLS)
                 .hide(UiGroup.SETTINGS_PLAYBACK_SUBMENU)
                 .hide(UiGroup.SETTINGS_QUALITY_SUBMENU)
+                .hide(UiGroup.SETTINGS_AUDIOTRACKS_SUBMENU)
+                .show(UiGroup.PLAYLIST)
                 .build())
-
+            .stretching(PlayerConfig.STRETCHING_UNIFORM)
             .build()
 
         mPlayer!!.setup(playerConfig)
@@ -150,7 +140,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, UiGroup.SETTINGS_MENU,this)
+        controls.bindSettingPan(mPlayer!!, playerConfig!!,this)
 
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
 //        val params = FrameLayout.LayoutParams(
@@ -162,28 +152,6 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //        controls.bind(mPlayer!!, this)
     }
 
-    class ScaleListener : ScaleGestureDetector.OnScaleGestureListener {
-        override fun onScale(scaleGestureDetector: ScaleGestureDetector?): Boolean {
-            MainActivity().mScaleFactor *= scaleGestureDetector?.scaleFactor!!
-            MainActivity().mPlayerView?.scaleX = MainActivity().mScaleFactor
-            MainActivity().mPlayerView?.scaleY = MainActivity().mScaleFactor
-            Log.i("fsdhgfshgfdshsd1", "onScale: ${MainActivity().mScaleFactor}")
-            return true
-        }
-
-        override fun onScaleBegin(p0: ScaleGestureDetector?): Boolean {
-            Log.i("fsdhgfshgfdshsd2", "onScale: ${p0?.scaleFactor}")
-
-            return false
-        }
-
-        override fun onScaleEnd(p0: ScaleGestureDetector?) {
-            Log.i("fsdhgfshgfdshsd3", "onScale: ${p0?.scaleFactor}")
-
-//            TODO("Not yet implemented")
-        }
-
-    }
 
     // Without the Google API's Chromecast won't work
     private fun isGoogleApiAvailable(context: Context): Boolean {
