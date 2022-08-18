@@ -163,7 +163,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     private fun updateContentUi() {
-        isVisibility.value = true
+        isVisibility.value = shouldPlayIconBeVisible()
         isPlayToggleVisible.value = shouldPlayToggleBeVisible()
         isPlayIcon.value = shouldPlayIconBeVisible()
         isSeekbarVisible.value = shouldSeekbarBeVisible()

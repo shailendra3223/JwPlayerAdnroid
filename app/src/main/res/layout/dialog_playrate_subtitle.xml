@@ -1,64 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black"
-    android:padding="12dp"
-    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/tvDone"
-        android:layout_width="wrap_content"
+    <data>
+        <variable
+            name="adapterPlayRate"
+            type="com.example.jwplayer.adapter.SelectAdapter" />
+
+        <variable
+            name="adapterQuality"
+            type="com.example.jwplayer.adapter.SelectAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Done"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@color/transparent25"
+        android:minWidth="450dp"
+        android:minHeight="300dp"
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/tvPlayRate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/play_rate"
-        android:textColor="@color/white"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/rv_play_rate"
-        app:layout_constraintTop_toBottomOf="@+id/tvDone" />
+        <TextView
+            android:id="@+id/tvDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Done"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tvQualityLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/quality_level"
-        android:textColor="@color/white"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/rv_quality_level"
-        app:layout_constraintTop_toBottomOf="@+id/tvDone" />
+        <TextView
+            android:id="@+id/tvPlayRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/play_rate"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/rv_play_rate"
+            app:layout_constraintTop_toBottomOf="@+id/tvDone" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_play_rate"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/rv_quality_level"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvPlayRate" />
+        <TextView
+            android:id="@+id/tvQualityLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/quality_level"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/rv_quality_level"
+            app:layout_constraintTop_toBottomOf="@+id/tvDone" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_quality_level"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/rv_play_rate"
-        app:layout_constraintTop_toBottomOf="@+id/tvQualityLevel" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_play_rate"
+            android:layout_width="160dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="10dp"
+            android:adapter="@{adapterPlayRate}"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rv_quality_level"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvPlayRate" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_quality_level"
+            android:layout_width="200dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="4dp"
+            android:adapter="@{adapterQuality}"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvDone"
+            app:layout_constraintStart_toEndOf="@+id/rv_play_rate"
+            app:layout_constraintTop_toBottomOf="@+id/tvQualityLevel" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
