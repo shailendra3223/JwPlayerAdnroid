@@ -85,7 +85,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     /**
      * This assumes VOD content only. Does not account for Live and DVR scenarios
      */
-    private fun handleTimeUpdate(
+    public fun handleTimeUpdate(
         position: Double,
         duration: Double,
         percentageLD: MutableLiveData<Int>

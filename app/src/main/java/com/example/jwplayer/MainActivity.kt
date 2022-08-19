@@ -58,8 +58,6 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         mPlayerView!!.setOnClickListener {
             Log.i("fsdhgfshgfdshsd555", "onScale: ${MainActivity().mScaleFactor}")
         }
-        Log.i("fsdhgfshgfdshsd565", "onScale: ${isGoogleApiAvailable(this)}")
-
         if (isGoogleApiAvailable(this)) {
             mCastContext = CastContext.getSharedInstance(applicationContext)
         }

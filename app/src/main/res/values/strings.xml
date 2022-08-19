@@ -5,4 +5,7 @@
     <string name="subtitles_amp_audio"><![CDATA[Subtitles & Audio]]></string>
     <string name="play_rate">Play Rate</string>
     <string name="quality_level">Quality Level</string>
+    <string name="connect">Connect</string>
+    <string name="connect_your_device">Connect Your Device</string>
+    <string name="cancel">Cancel</string>
 </resources>

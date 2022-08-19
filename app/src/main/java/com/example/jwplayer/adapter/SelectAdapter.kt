@@ -25,12 +25,12 @@ class SelectAdapter(
     class SelectedViewHolder(var binding: LayoutRadioBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind(data: SelectItem, position: Int, mFLAG: Int) {
             if (mFLAG == 1001) {
-                binding.tvShopName.text = data.valuePlayRate.toString()
+                binding.tvItemName.text = data.valuePlayRate.toString()
             } else if (mFLAG == 1002) {
-                binding.tvShopName.text = data.valueQuality!!.label.toString()
+                binding.tvItemName.text = data.valueQuality!!.label.toString()
             } else if (mFLAG == 1004) {
                 Log.i("TAGlo", "onBind: ${data.valueSubtitle!!.label.toString()}")
-                binding.tvShopName.text = data.valueSubtitle!!.label.toString()
+                binding.tvItemName.text = data.valueSubtitle!!.label.toString()
             }
         }
 
@@ -51,7 +51,6 @@ class SelectAdapter(
 
         if (viewHolder is SelectedViewHolder) {
             val data: SelectItem = dataList[position]
-            Log.i("TAGloo", "onBind: ${FLAG}")
             viewHolder.onBind(data, position, FLAG)
 
             var pos = position
@@ -71,7 +70,7 @@ class SelectAdapter(
                 notifyItemChanged(selectedPosition)
 
                 viewHolder.binding.radio.tag = data
-                selectListener.onSelected(data, FLAG, position)
+                selectListener.onSelected(data, position, FLAG)
 
             }
 
