@@ -7,12 +7,10 @@ import android.os.CountDownTimer
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.view.View.OnClickListener
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
@@ -20,7 +18,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.example.jwplayer.adapter.SelectAdapter
 import com.example.jwplayer.databinding.DialogPlayrateSubtitleBinding
 import com.example.jwplayer.model.SelectItem
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.configuration.PlayerConfig
 import com.jwplayer.pub.api.media.adaptive.QualityLevel
@@ -46,7 +43,7 @@ class CustomPlayerView(
     private var mTitle: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
-    private var fullscreenToggle: ImageView? = null
+    //    private var fullscreenToggle: ImageView? = null
     private var ZoomInOut: ImageView? = null
     private var ivChromeCast: ImageView? = null
 //    private var clParentView: View? = null
@@ -68,7 +65,7 @@ class CustomPlayerView(
         mNextEpisode = findViewById(R.id.tv_next_episode)
         contentSeekBar = findViewById(R.id.seekbar)
         playToggle = findViewById(R.id.play_pause_toggle)
-        fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
+//        fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
         mTitle = findViewById(R.id.tv_title)
         ZoomInOut = findViewById(R.id.iv_zoom_in_out)
         ZoomInOut!!.visibility = GONE
@@ -87,10 +84,10 @@ class CustomPlayerView(
 
         customPlayerView.isFirstFrame.observe(lifecycleOwner) { mJWPlayer: JWPlayer ->
             mTitle!!.text = mJWPlayer.playlistItem.mTitle
+            visibilityComponents(GONE)
         }
 
         customPlayerView.isVisibility.observe(lifecycleOwner) {
-            Log.d("VIETAGL", "Firs${it}")
             if (it) {
                 visibilityComponents(VISIBLE)
                 sec3Timer(customPlayerView)
@@ -118,25 +115,28 @@ class CustomPlayerView(
             AlertDialogCast(customPlayerView, 1003)
         }
 
-        ZoomInOut!!.setOnClickListener { v: View? ->
+        ZoomInOut!!.setOnClickListener {
             visibilityComponents(GONE)
 
-            val enlarge = if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
-                PlayerConfig.STRETCHING_UNIFORM
-            } else {
-                PlayerConfig.STRETCHING_FILL
-            }
-            customPlayerView.player.setup(PlayerConfig.Builder()
-                .playlist(playerConfig.playlist)
-                .uiConfig(playerConfig.mUiConfig)
-                .stretching(enlarge)
-                .autostart(true)
-                .build())
+            val enlarge =
+                if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
+                    PlayerConfig.STRETCHING_UNIFORM
+                } else {
+                    PlayerConfig.STRETCHING_FILL
+                }
+            customPlayerView.player.setup(
+                PlayerConfig.Builder()
+                    .playlist(playerConfig.playlist)
+                    .uiConfig(playerConfig.mUiConfig)
+                    .stretching(enlarge)
+                    .autostart(true)
+                    .build()
+            )
 //            customPlayerView.player.setP
 //            customPlayerView.player.duration
         }
 
-        mEpisodes!!.setOnClickListener { v: View? ->
+        mEpisodes!!.setOnClickListener {
             Log.i("TAG", "mEpisodes: ")
             customPlayerView.disableTouch = true
             customPlayerView.isVisibility.value = false
@@ -146,7 +146,7 @@ class CustomPlayerView(
             playlistViewModel.open()
         }
 //        setOnClickListener { v: View? -> settingMenuViewModel.setSelectedSubmenu() }
-        ivChromeCast!!.setOnClickListener { v: View? ->
+        ivChromeCast!!.setOnClickListener {
             Log.i("TAG", "bindSettingPan: ")
             customPlayerView.isVisibility.value = false
             customPlayerView.disableTouch = true
@@ -201,17 +201,17 @@ class CustomPlayerView(
                     .getDrawable(context, R.drawable.ic_jw_pause)
             )
         }
-        playToggle!!.setOnClickListener(OnClickListener { v: View? -> customPlayerView.togglePlay() })
+        playToggle!!.setOnClickListener { v: View? -> customPlayerView.togglePlay() }
 
-        customPlayerView.isFullscreen.observe(lifecycleOwner) { isFullscreen ->
-            fullscreenToggle!!.setImageDrawable(
-                if (isFullscreen) AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.ic_jw_exit_fullscreen
-                )
-                else AppCompatResources.getDrawable(context, R.drawable.ic_jw_enter_fullscreen)
-            )
-        }
+//        customPlayerView.isFullscreen.observe(lifecycleOwner) { isFullscreen ->
+//            fullscreenToggle!!.setImageDrawable(
+//                if (isFullscreen) AppCompatResources.getDrawable(
+//                    context,
+//                    R.drawable.ic_jw_exit_fullscreen
+//                )
+//                else AppCompatResources.getDrawable(context, R.drawable.ic_jw_enter_fullscreen)
+//            )
+//        }
 //        fullscreenToggle!!.setOnClickListener(OnClickListener { v: View? -> customPlayerView.toggleFullscreen() })
     }
 
@@ -238,7 +238,7 @@ class CustomPlayerView(
         mTitle!!.visibility = isVisible
         contentSeekBar!!.visibility = isVisible
         playToggle!!.visibility = isVisible
-        fullscreenToggle!!.visibility = isVisible
+//        fullscreenToggle!!.visibility = isVisible
 //        ZoomInOut!!.visibility = isVisible
         ivChromeCast!!.visibility = isVisible
         mNextEpisode!!.visibility = isVisible
@@ -264,7 +264,12 @@ class CustomPlayerView(
         val dialog = Dialog(context) // where "this" is the context
 
         val binding: DialogPlayrateSubtitleBinding =
-            DataBindingUtil.inflate(dialog.layoutInflater, R.layout.dialog_playrate_subtitle, null, false)
+            DataBindingUtil.inflate(
+                dialog.layoutInflater,
+                R.layout.dialog_playrate_subtitle,
+                null,
+                false
+            )
         if (FLAG == 1001) {
             binding.adapterPlayRate = setPlayRateData()
 
@@ -305,39 +310,38 @@ class CustomPlayerView(
         dialog.show()
     }
 
-    private fun setPlayRateData() : SelectAdapter {
+    private fun setPlayRateData(): SelectAdapter {
         val list = ArrayList<SelectItem>()
         val playbackRates = doubleArrayOf(0.5, 1.0, 1.5, 2.0)
-        for(item in playbackRates) {
+        for (item in playbackRates) {
             list.add(SelectItem(item, null, null, null, false))
         }
-      return  SelectAdapter(context, list, 1001, this)
+        return SelectAdapter(context, list, 1001, this)
     }
 
-    private fun setQualityLevel(qualityLevel: ArrayList<QualityLevel>) : SelectAdapter {
+    private fun setQualityLevel(qualityLevel: ArrayList<QualityLevel>): SelectAdapter {
         val list = ArrayList<SelectItem>()
-        for(item in qualityLevel) {
+        for (item in qualityLevel) {
             list.add(SelectItem(0.0, item, null, null, false))
         }
-        return  SelectAdapter(context, list, 1002, this)
+        return SelectAdapter(context, list, 1002, this)
     }
 
-    private fun setAudio(audioTrack: ArrayList<AudioTrack>) : SelectAdapter {
+    private fun setAudio(audioTrack: ArrayList<AudioTrack>): SelectAdapter {
         val list = ArrayList<SelectItem>()
-        for(item in audioTrack) {
+        for (item in audioTrack) {
             list.add(SelectItem(0.0, null, item, null, false))
         }
-        return  SelectAdapter(context, list, 1003, this)
+        return SelectAdapter(context, list, 1003, this)
     }
 
-    private fun setSubtitle(caption: ArrayList<Caption>) : SelectAdapter {
+    private fun setSubtitle(caption: ArrayList<Caption>): SelectAdapter {
         val list = ArrayList<SelectItem>()
-        for(item in caption) {
+        for (item in caption) {
             list.add(SelectItem(0.0, null, null, item, false))
         }
-        return  SelectAdapter(context, list, 1004, this)
+        return SelectAdapter(context, list, 1004, this)
     }
-
 
     init {
         initView(context)

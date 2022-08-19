@@ -1,19 +1,15 @@
 package com.example.jwplayer
 
 import android.util.Log
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.PlayerState
 import com.jwplayer.pub.api.UiGroup
-import com.jwplayer.pub.api.configuration.PlayerConfig
 import com.jwplayer.pub.api.events.*
 import com.jwplayer.pub.api.events.listeners.CastingEvents
-import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents
 import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents.*
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
-import com.jwplayer.pub.ui.viewmodels.SettingsMenuViewModel
 
 /**
  * This is only an example of how you could handle player events to drive UI state and behavior
@@ -46,28 +42,37 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     val isFirstFrame = MutableLiveData<JWPlayer>()
     val isVisibility = MutableLiveData(true)
     var disableTouch = false
-    val isControl = MutableLiveData<JWPlayer>()
 
     public fun onChromeCast() : CastingMenuViewModel {
         return player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
     }
 
-    override fun onFirstFrame(firstFrameEvent: FirstFrameEvent) {
-        Log.d("VIEWMODEL", "FirstFrame fired")
-        isFirstFrame.value = firstFrameEvent.player
-    }
-
-    override fun onPlay(playEvent: PlayEvent) {
-        resetAdState()
+    override fun onReady(readyEvent: ReadyEvent) {
+        Log.d("TAGSS", "onReady")
+//        resetAdState()
         //        updateAdsUi();
         updateContentUi()
     }
 
+    override fun onFirstFrame(firstFrameEvent: FirstFrameEvent) {
+        Log.d("TAGSS", "onFirstFrame")
+        isFirstFrame.value = firstFrameEvent.player
+    }
+
+    override fun onPlay(playEvent: PlayEvent) {
+
+        Log.d("TAGSS", "onPlay")
+//        resetAdState()
+        updateContentUi()
+    }
+
     override fun onPause(pauseEvent: PauseEvent) {
+        Log.d("TAGSS", "onPause")
         updateContentUi()
     }
 
     override fun onTime(timeEvent: TimeEvent) {
+//        Log.d("TAGSS", "onTime")
         handleTimeUpdate(
             timeEvent.position,
             timeEvent.duration,
@@ -75,39 +80,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         )
     }
 
-    //    @Override
-    //    public void onAdMeta(AdMetaEvent adMetaEvent) {
-    //        currentSkipOffset = adMetaEvent.getSkipOffset();
-    //        clickthroughURL = adMetaEvent.getClickThroughUrl();
-    //    }
-    //
-    //    @Override
-    //    public void onAdTime(AdTimeEvent adTimeEvent) {
-    //        handleTimeUpdate(adTimeEvent.getPosition(),
-    //                         adTimeEvent.getDuration(),
-    //                         adProgressPercentage
-    //        );
-    //        handleSkipOffsetUpdates((int) adTimeEvent.getPosition());
-    //    }
-    private fun handleSkipOffsetUpdates(position: Int) {
-        if (currentSkipOffset == NO_VALUE_POSITION) {
-            isSkipButtonVisible.value = false
-            isSkipButtonEnabled.value = false
-            return
-        }
-        val skipCounter = currentSkipOffset - position
-        if (skipCounter <= 0) {
-            // you are allowed to skip
-            isSkipButtonVisible.value = true
-            isSkipButtonEnabled.value = true
-            skipOffsetCountdown.setValue("Skip ad")
-        } else {
-            // skip is available, but still counting down
-            isSkipButtonVisible.value = true
-            isSkipButtonEnabled.value = false
-            skipOffsetCountdown.setValue("Skip ad in $skipCounter")
-        }
-    }
+
 
     /**
      * This assumes VOD content only. Does not account for Live and DVR scenarios
@@ -141,13 +114,10 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     //        updateContentUi();
     //        updateAdsUi();
     //    }
-    override fun onReady(readyEvent: ReadyEvent) {
-        resetAdState()
-        //        updateAdsUi();
-        updateContentUi()
-    }
+
 
     override fun onFullscreen(fullscreenEvent: FullscreenEvent) {
+        Log.d("TAGSS", "onFullscreen")
         isFullscreen.value = fullscreenEvent.fullscreen
     }
 
@@ -158,15 +128,14 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         adProgressPercentage.value = NO_VALUE_POSITION
         skipOffsetCountdown.value = NO_VALUE_STRING
         isSkipButtonVisible.value = false
-        //        isAdProgressVisible.setValue(false);
         isLearnMoreVisible.value = false
     }
 
     private fun updateContentUi() {
-        isVisibility.value = shouldPlayIconBeVisible()
         isPlayToggleVisible.value = shouldPlayToggleBeVisible()
         isPlayIcon.value = shouldPlayIconBeVisible()
         isSeekbarVisible.value = shouldSeekbarBeVisible()
+        isVisibility.value = shouldPlayIconBeVisible()
     }
 
     private fun updateAdsUi() {
@@ -226,21 +195,6 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         return adProgressPercentage
     }
 
-    fun getSkipOffsetCountdown(): LiveData<String> {
-        return skipOffsetCountdown
-    }
-
-    fun getIsSkipButtonVisible(): LiveData<Boolean> {
-        return isSkipButtonVisible
-    }
-
-    fun getIsSkipButtonEnabled(): LiveData<Boolean> {
-        return isSkipButtonEnabled
-    }
-
-    fun openAdClickthrough() {
-        player.openAdClickthrough()
-    }
 
     fun getIsPlayToggleVisible(): LiveData<Boolean> {
         return isPlayToggleVisible
@@ -254,13 +208,6 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         return isSeekbarVisible
     }
 
-    //    public LiveData<Boolean> getIsAdProgressVisible() {
-    //        return isAdProgressVisible;
-    //    }
-    fun getIsLearnMoreVisible(): LiveData<Boolean> {
-        return isLearnMoreVisible
-    }
-
     fun getIsFullscreen(): LiveData<Boolean> {
         return isFullscreen
     }
@@ -270,6 +217,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     override fun onComplete(completeEvent: CompleteEvent) {
+        Log.d("TAGSS", "onComplete")
         updateContentUi()
     }
 
@@ -286,10 +234,6 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         player.addListener(EventType.COMPLETE, this)
         player.addListener(EventType.FULLSCREEN, this)
         player.addListener(EventType.DISPLAY_CLICK, this)
-        //        player.addListener(EventType.AD_TIME, this);
-//        player.addListener(EventType.AD_META, this);
-//        player.addListener(EventType.AD_BREAK_START, this);
-//        player.addListener(EventType.AD_BREAK_END, this);
         player.addListener(EventType.READY, this)
     }
 
@@ -299,11 +243,10 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         if (!disableTouch) {
             isVisibility.value = !isVisibility.value!!
         }
-//        isVisibility.value = true
 
     }
 
     override fun onCast(p0: CastEvent?) {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
     }
 }
