@@ -16,7 +16,6 @@ import kotlin.collections.List
 class CastSelectAdapter (
     private val context: Context,
     private val dataList: List<MediaRouter.RouteInfo>,
-    private val customPlayerView: CustomPlayerViewModel,
     private val selectListener: CastDevicesInterface
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -45,15 +44,14 @@ class CastSelectAdapter (
 
             viewHolder.binding.tvConnect.setOnClickListener {
                 viewHolder.binding.tvConnect.tag = data
-                val cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
-                selectListener.onConnect(data, cast, position)
+                selectListener.onConnect(data, position)
             }
 
         }
     }
 
     interface CastDevicesInterface {
-        fun onConnect(data: MediaRouter.RouteInfo, cast: CastingMenuViewModel, position : Int)
+        fun onConnect(data: MediaRouter.RouteInfo, position : Int)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

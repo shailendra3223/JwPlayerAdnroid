@@ -18,8 +18,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.mediarouter.media.MediaRouter
 import com.example.jwplayer.adapter.CastSelectAdapter
 import com.example.jwplayer.adapter.SelectAdapter
+import com.example.jwplayer.databinding.DialogCastBinding
 import com.example.jwplayer.databinding.DialogPlayrateSubtitleBinding
-import com.example.jwplayer.model.CastSelectItem
 import com.example.jwplayer.model.SelectItem
 import com.google.android.gms.cast.CastDevice
 import com.jwplayer.pub.api.JWPlayer
@@ -40,7 +40,7 @@ class CustomPlayerView(
 ) :
     ConstraintLayout(
         context!!, attrs, defStyleAttr, defStyleRes
-    ), SelectAdapter.SelectItemInterface, CastSelectAdapter.CastDevicesInterface {
+    ), SelectAdapter.SelectItemInterface {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
@@ -91,6 +91,7 @@ class CustomPlayerView(
         lifecycleOwner: LifecycleOwner
     ) {
 
+        val cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         customPlayerView.isFirstFrame.observe(lifecycleOwner) { mJWPlayer: JWPlayer ->
             mTitle!!.text = mJWPlayer.playlistItem.mTitle
             visibilityComponents(GONE)
@@ -175,19 +176,7 @@ class CustomPlayerView(
                 }
             }
 
-//            val cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
-//            Log.i("TAG", "bindSettingPoan: ${devices[0]}")
-//            Log.i("TAG", "bindSettingPoan: ${mRoutes[1]}")
-//            cast.availableDevices?.value?.get(0)
-
-
-            AlertDialogCast(customPlayerView, isCastRoutes)
-//            Log.i("TAG", "bindSettingPoan: ${cast.beginCasting(
-//                cast?.availableDevices?.value?.get(0))}")
-//            if (customPlayerView.onChromeCast().availableDevices.value!!.size > 0) {
-//
-//            }
-
+            AlertDialogCast(customPlayerView, cast, isCastRoutes)
         }
 
         mNextEpisode!!.setOnClickListener {
@@ -244,6 +233,8 @@ class CustomPlayerView(
         contentSeekBar!!.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 Log.i("TAG", "bindSettingPan setOnSeekBarChangeListener: $fromUser $progress")
+
+                Log.i("TAGjj", "bindSettingPan: ${cast.castingState.value}")
                 if (fromUser) {
                     customPlayerView.seek(progress)
                 }
@@ -416,39 +407,38 @@ class CustomPlayerView(
         }
     }
 
-    override fun onConnect(data: MediaRouter.RouteInfo, cast: CastingMenuViewModel,position: Int) {
-        cast.beginCasting(data)
-    }
-
-    private fun AlertDialogCast(customPlayerView: CustomPlayerViewModel, listRoutes : List<MediaRouter.RouteInfo>) {
+    private fun AlertDialogCast(customPlayerView: CustomPlayerViewModel, cast: CastingMenuViewModel,listRoutes : List<MediaRouter.RouteInfo>) {
         val dialog = Dialog(context) // where "this" is the context
 
-        val binding: DialogPlayrateSubtitleBinding =
+        val binding: DialogCastBinding =
             DataBindingUtil.inflate(
                 dialog.layoutInflater,
-                R.layout.dialog_playrate_subtitle,
+                R.layout.dialog_cast,
                 null,
                 false
             )
 
-        binding.rvPlayRate.visibility = GONE
-        binding.rvQualityLevel.visibility = GONE
-        binding.tvPlayRate.visibility = GONE
-        binding.tvQualityLevel.visibility = GONE
-        binding.rvCast.visibility = VISIBLE
-        binding.tvCasting.visibility = VISIBLE
-
         binding.tvDone.text = context.getString(R.string.cancel)
-        val adapter = CastSelectAdapter(context, listRoutes, customPlayerView, this)
+        val adapter = CastSelectAdapter(context, listRoutes, object : CastSelectAdapter.CastDevicesInterface {
+            override fun onConnect(data: MediaRouter.RouteInfo,position: Int) {
+                Log.i("TAGop", "onConnect: ${cast.castingState.value}")
+                dialog.dismiss()
+                cast.beginCasting(data)
+            }
+        })
+
         binding.adapterCast = adapter
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         binding.tvDone.setOnClickListener {
-            customPlayerView.player.play()
             dialog.dismiss()
         }
         dialog.setContentView(binding.root)
         dialog.show()
+    }
+
+    private fun dismissDialog(dialog: Dialog) {
+        dialog.dismiss()
     }
 }

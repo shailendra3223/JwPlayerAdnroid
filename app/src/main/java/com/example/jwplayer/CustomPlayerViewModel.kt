@@ -246,7 +246,9 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     }
 
-    override fun onCast(p0: CastEvent?) {
+    override fun onCast(castEvent: CastEvent?) {
 //        TODO("Not yet implemented")
+        Log.i("TAGop", "onCast: ${castEvent!!.deviceName} : ${castEvent!!.deviceName} : ${castEvent!!.deviceName} ")
+
     }
 }
