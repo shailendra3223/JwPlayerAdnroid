@@ -4,9 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
@@ -102,18 +99,21 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         var playerConfig = PlayerConfig.Builder()
             .playlist(playlist)
             .autostart(true)
-            .uiConfig(UiConfig.Builder()
-                .displayAllControls()
-                .hide(UiGroup.CASTING_MENU)
-                .hide(UiGroup.CONTROLBAR)
-                .hide(UiGroup.CENTER_CONTROLS)
-                .hide(UiGroup.SETTINGS_PLAYBACK_SUBMENU)
-                .hide(UiGroup.SETTINGS_QUALITY_SUBMENU)
-                .hide(UiGroup.SETTINGS_AUDIOTRACKS_SUBMENU)
-                .show(UiGroup.PLAYLIST)
-                .build())
+            .uiConfig(
+                UiConfig.Builder()
+                    .displayAllControls()
+                    .hide(UiGroup.CASTING_MENU)
+                    .hide(UiGroup.CONTROLBAR)
+                    .hide(UiGroup.CENTER_CONTROLS)
+                    .hide(UiGroup.SETTINGS_PLAYBACK_SUBMENU)
+                    .hide(UiGroup.SETTINGS_QUALITY_SUBMENU)
+                    .hide(UiGroup.SETTINGS_AUDIOTRACKS_SUBMENU)
+                    .show(UiGroup.PLAYLIST)
+                    .build()
+            )
             .stretching(PlayerConfig.STRETCHING_UNIFORM)
             .build()
+        mPlayer!!.exoPlayerSettings.enableChunkLessPreparation();
 
         mPlayer!!.setup(playerConfig)
 
@@ -131,14 +131,15 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //            .stretching(PlayerConfig.STRETCHING_FILL)
             .build()
         mPlayer!!.setup(config)*/
-        val controls = MyControlPan(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_ActionBar))
+        val controls =
+            MyControlPan(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_ActionBar))
         val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, playerConfig!!,this)
+        controls.bindSettingPan(mPlayer!!, playerConfig!!, this)
 
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
 //        val params = FrameLayout.LayoutParams(

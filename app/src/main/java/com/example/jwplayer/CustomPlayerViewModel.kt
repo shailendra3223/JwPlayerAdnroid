@@ -5,29 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.PlayerState
-import com.jwplayer.pub.api.UiGroup
 import com.jwplayer.pub.api.events.*
-import com.jwplayer.pub.api.events.listeners.CastingEvents
 import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents.*
-import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 
 /**
  * This is only an example of how you could handle player events to drive UI state and behavior
  */
 class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlayListener,
     OnPauseListener, OnCompleteListener, OnTimeListener, OnFullscreenListener,
-    OnReadyListener, OnDisplayClickListener,
-    CastingEvents.OnCastListener  {
+    OnReadyListener, OnDisplayClickListener {
     // ADS
     var isAdPlaying = false
         private set
     private val adProgressPercentage = MutableLiveData(NO_VALUE_POSITION)
-
-    //    private MutableLiveData<Boolean> isAdProgressVisible = new MutableLiveData<>(false);
     private var currentSkipOffset = NO_VALUE_POSITION
     private val skipOffsetCountdown = MutableLiveData(NO_VALUE_STRING)
     private val isSkipButtonVisible = MutableLiveData(false)
-    private val isSkipButtonEnabled = MutableLiveData(false)
     private val isLearnMoreVisible = MutableLiveData(false)
     private var clickthroughURL = NO_VALUE_STRING
 
@@ -38,41 +31,34 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     val isFullscreen = MutableLiveData(false)
     val contentProgressPercentage = MutableLiveData(NO_VALUE_POSITION)
 
-
     val isFirstFrame = MutableLiveData<JWPlayer>()
     val isVisibility = MutableLiveData(true)
-    var disableTouch = false
-
-    public fun onChromeCast() : CastingMenuViewModel {
-        return player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
-    }
+    val disableTouch = MutableLiveData(false)
+    val printTime = MutableLiveData("")
 
     override fun onReady(readyEvent: ReadyEvent) {
-        Log.d("TAGSS", "onReady")
-//        resetAdState()
-        //        updateAdsUi();
+        Log.d("TAG", "onReady")
         updateContentUi()
     }
 
     override fun onFirstFrame(firstFrameEvent: FirstFrameEvent) {
-        Log.d("TAGSS", "onFirstFrame")
+        Log.d("TAG", "onFirstFrame")
         isFirstFrame.value = firstFrameEvent.player
     }
 
     override fun onPlay(playEvent: PlayEvent) {
-
-        Log.d("TAGSS", "onPlay")
-//        resetAdState()
+        Log.d("TAG", "onPlay")
         updateContentUi()
     }
 
     override fun onPause(pauseEvent: PauseEvent) {
-        Log.d("TAGSS", "onPause")
+        Log.d("TAG", "onPause")
         updateContentUi()
     }
 
     override fun onTime(timeEvent: TimeEvent) {
-//        Log.d("TAGSS", "onTime")
+        Log.d("TAG", "onTime ${timeEvent.duration} ${timeEvent.position}")
+        printTime.value = readTime(timeEvent.position)
         handleTimeUpdate(
             timeEvent.position,
             timeEvent.duration,
@@ -80,8 +66,20 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         )
     }
 
+    private fun readTime(position: Double) : String {
+        var min = position.toInt() / 60
+        val sec = position.toInt() % 60
+        var hr = 0
+        if (min >= 60) {
+            hr = min/60
+            min %= 60
+        }
 
-
+        var hours = if(hr.toString().length == 1) "0${hr}" else hr
+        var minutie = if(min.toString().length == 1) "0${min}" else min
+        var second = if(sec.toString().length == 1) "0${sec}" else sec
+        return ("${hours}:${minutie}:${second}")
+    }
     /**
      * This assumes VOD content only. Does not account for Live and DVR scenarios
      */
@@ -101,23 +99,8 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         return (position * 100 / duration).toInt()
     }
 
-    //    @Override
-    //    public void onAdBreakEnd(AdBreakEndEvent adBreakEndEvent) {
-    //        resetAdState();
-    //        updateAdsUi();
-    //        updateContentUi();
-    //    }
-    //
-    //    @Override
-    //    public void onAdBreakStart(AdBreakStartEvent adBreakStartEvent) {
-    //        isAdPlaying = true;
-    //        updateContentUi();
-    //        updateAdsUi();
-    //    }
-
-
     override fun onFullscreen(fullscreenEvent: FullscreenEvent) {
-        Log.d("TAGSS", "onFullscreen")
+        Log.d("TAG", "onFullscreen")
         isFullscreen.value = fullscreenEvent.fullscreen
     }
 
@@ -238,17 +221,8 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     override fun onDisplayClick(click: DisplayClickEvent) {
-        Log.i("TAGop", "onDisplayClick:mEpisodes ${isVisibility.value} $disableTouch")
-
-        if (!disableTouch) {
+        if (!disableTouch.value!!) {
             isVisibility.value = !isVisibility.value!!
         }
-
-    }
-
-    override fun onCast(castEvent: CastEvent?) {
-//        TODO("Not yet implemented")
-        Log.i("TAGop", "onCast: ${castEvent!!.deviceName} : ${castEvent!!.deviceName} : ${castEvent!!.deviceName} ")
-
     }
 }

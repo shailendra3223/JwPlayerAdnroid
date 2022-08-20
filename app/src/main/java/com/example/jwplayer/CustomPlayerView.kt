@@ -22,6 +22,10 @@ import com.example.jwplayer.databinding.DialogCastBinding
 import com.example.jwplayer.databinding.DialogPlayrateSubtitleBinding
 import com.example.jwplayer.model.SelectItem
 import com.google.android.gms.cast.CastDevice
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.MediaIntentReceiver
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.UiGroup
 import com.jwplayer.pub.api.configuration.PlayerConfig
@@ -40,12 +44,13 @@ class CustomPlayerView(
 ) :
     ConstraintLayout(
         context!!, attrs, defStyleAttr, defStyleRes
-    ), SelectAdapter.SelectItemInterface {
+    ), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession> {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
     private var mNextEpisode: TextView? = null
     private var mTitle: TextView? = null
+    private var tvTime: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
     //    private var fullscreenToggle: ImageView? = null
@@ -53,7 +58,6 @@ class CustomPlayerView(
     private var ivChromeCast: ImageView? = null
     private var ivFastForward15: ImageView? = null
     private var ivFastBackward15: ImageView? = null
-//    private var clParentView: View? = null
 
     @JvmOverloads
     constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
@@ -75,66 +79,64 @@ class CustomPlayerView(
 //        fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
         mTitle = findViewById(R.id.tv_title)
         ZoomInOut = findViewById(R.id.iv_zoom_in_out)
-        ZoomInOut!!.visibility = GONE
         ivChromeCast = findViewById(R.id.iv_chrome_cast)
         ivFastForward15 = findViewById(R.id.tv_fast_forward_15)
         ivFastBackward15 = findViewById(R.id.tv_fast_backward_15)
-//        clParentView = findViewById(R.id.cl_parent_view)
+        tvTime = findViewById(R.id.tv_time)
     }
 
     @SuppressLint("SetTextI18n")
     fun bindSettingPan(
         customPlayerView: CustomPlayerViewModel,
-        settingMenuViewModel: CastingMenuViewModel,
         playlistViewModel: PlaylistViewModel,
         playerConfig: PlayerConfig,
         lifecycleOwner: LifecycleOwner
     ) {
-
+        val mCastContext = CastContext.getSharedInstance(context)
         val cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         customPlayerView.isFirstFrame.observe(lifecycleOwner) { mJWPlayer: JWPlayer ->
             mTitle!!.text = mJWPlayer.playlistItem.mTitle
-            visibilityComponents(GONE)
+        }
+
+        customPlayerView.printTime.observe(lifecycleOwner) {
+            tvTime!!.text = it
         }
 
         customPlayerView.isVisibility.observe(lifecycleOwner) {
-            if (it) {
-                sec3Timer()
+            if (it && customPlayerView.disableTouch.value != true) {
+                sec3Timer(customPlayerView)
             } else {
                 visibilityComponents(GONE)
+                customPlayerView.disableTouch.value = false
             }
+            Log.i("TAG", "GIOLL2: ${mEpisodes!!.visibility}")
         }
 
-
-//        settingMenuViewModel.currentPlaybackRate.observe(lifecycleOwner!!) { url: String? ->
-//            Picasso.get().load(url).into(poster)
-//        }
-//        settingMenuViewModel.currentQualityLevel.observe(lifecycleOwner) { string: QualityLevel? ->  }
-
-//        settingMenuViewModel.nextUpTimeRemaining.observe(lifecycleOwner) { remaining: Int ->
-//            countdown!!.text = "Next in: $remaining"
-//        }
         mVideoSetting!!.setOnClickListener { v: View? ->
-            sec3Timer()
+            customPlayerView.isVisibility.value = false
+            customPlayerView.disableTouch.value = true
             customPlayerView.player.pause()
             AlertDialogPlayer(customPlayerView, 1001)
         }
 
         mSubtitleAudio!!.setOnClickListener { v: View? ->
-            sec3Timer()
+            customPlayerView.isVisibility.value = false
+            customPlayerView.disableTouch.value = true
             customPlayerView.player.pause()
             AlertDialogPlayer(customPlayerView, 1003)
         }
 
         ZoomInOut!!.setOnClickListener {
-            sec3Timer()
-            visibilityComponents(GONE)
+            customPlayerView.isVisibility.value = false
+            customPlayerView.disableTouch.value = true
 
+            val mPosition = customPlayerView.player.position
+            Log.i("TAG", "IOKLL1: ${mPosition}")
             val enlarge =
                 if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
                     PlayerConfig.STRETCHING_UNIFORM
                 } else {
-                    PlayerConfig.STRETCHING_FILL
+                    PlayerConfig.STRETCHING_EXACT_FIT
                 }
             customPlayerView.player.setup(
                 PlayerConfig.Builder()
@@ -144,27 +146,24 @@ class CustomPlayerView(
                     .autostart(true)
                     .build()
             )
-//            customPlayerView.player.setP
-//            customPlayerView.player.duration
+            customPlayerView.player.seek(mPosition)
+
+            Log.i("TAG", "IOKLL2: ${customPlayerView.player.position}")
         }
 
         mEpisodes!!.setOnClickListener {
-            Log.i("TAG", "mEpisodes: ")
-            customPlayerView.disableTouch = true
             customPlayerView.isVisibility.value = false
-            visibilityComponents(GONE)
-            Log.i("TAG", "mEpisodes: ${customPlayerView.disableTouch}")
-
+            customPlayerView.disableTouch.value = true
+            Log.i("TAG", "GIOLL1: ${mEpisodes!!.visibility}")
             playlistViewModel.open()
         }
 
         ivChromeCast!!.setOnClickListener {
-            sec3Timer()
             customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch = true
+            customPlayerView.disableTouch.value = true
 
-            val router : MediaRouter = MediaRouter.getInstance(context)
-            val mRoutes : List<MediaRouter.RouteInfo> =  router.routes
+            val router: MediaRouter = MediaRouter.getInstance(context)
+            val mRoutes: List<MediaRouter.RouteInfo> = router.routes
             val isCastRoutes = ArrayList<MediaRouter.RouteInfo>()
             val devices = ArrayList<CastDevice>()
 
@@ -176,12 +175,13 @@ class CustomPlayerView(
                 }
             }
 
-            AlertDialogCast(customPlayerView, cast, isCastRoutes)
+            AlertDialogCast(cast, isCastRoutes)
+
+//            CastStateListener mCastStateListener
+            mCastContext.sessionManager.addSessionManagerListener(this, CastSession::class.java)
         }
 
         mNextEpisode!!.setOnClickListener {
-            Log.i("TAG", "mNextEpisode: ${customPlayerView.disableTouch}")
-            sec3Timer()
             val next = customPlayerView.player.playlistIndex + 1
             if (next != customPlayerView.player.playlist.size) {
                 customPlayerView.player.playlistItem(next)
@@ -191,8 +191,7 @@ class CustomPlayerView(
         }
 
         ivFastForward15!!.setOnClickListener {
-            sec3Timer()
-            Log.i("TAG", "bindSettingPanff: ${customPlayerView.player.position}")
+            sec3Timer(customPlayerView)
             val position = customPlayerView.player.position + 15
 
             if (position >= customPlayerView.player.duration) {
@@ -202,44 +201,49 @@ class CustomPlayerView(
                 }
             } else if (position >= 0) {
                 customPlayerView.player.seek(position)
-                customPlayerView.handleTimeUpdate(position, customPlayerView.player.duration, customPlayerView.contentProgressPercentage)
+                customPlayerView.handleTimeUpdate(
+                    position,
+                    customPlayerView.player.duration,
+                    customPlayerView.contentProgressPercentage
+                )
             }
         }
 
         ivFastBackward15!!.setOnClickListener {
-            sec3Timer()
+            sec3Timer(customPlayerView)
             val position = customPlayerView.player.position - 15
-            Log.i("TAG", "bindSettingPanff: $position")
-            Log.i("TAG", "bindSettingPanff: ${customPlayerView.player.position}")
             if (position > 16) {
                 customPlayerView.player.seek(position)
-                customPlayerView.handleTimeUpdate(position, customPlayerView.player.duration, customPlayerView.contentProgressPercentage)
+                customPlayerView.handleTimeUpdate(
+                    position,
+                    customPlayerView.player.duration,
+                    customPlayerView.contentProgressPercentage
+                )
             } else {
                 customPlayerView.player.seek(0.1)
-                customPlayerView.handleTimeUpdate(0.1, customPlayerView.player.duration, customPlayerView.contentProgressPercentage)
+                customPlayerView.handleTimeUpdate(
+                    0.1,
+                    customPlayerView.player.duration,
+                    customPlayerView.contentProgressPercentage
+                )
             }
         }
 
 
         //SeekBar
         customPlayerView.contentProgressPercentage.observe(lifecycleOwner) { progress ->
-            customPlayerView.disableTouch = false
             contentSeekBar!!.progress = progress
         }
         customPlayerView.isSeekbarVisible.observe(lifecycleOwner) { isVisible ->
-            Log.i("TAG", "bindSettingPan isSeekbarVisible: $isVisible ")
             contentSeekBar!!.visibility = if (isVisible) VISIBLE else GONE
+            tvTime!!.visibility = if (isVisible) VISIBLE else GONE
         }
         contentSeekBar!!.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                Log.i("TAG", "bindSettingPan setOnSeekBarChangeListener: $fromUser $progress")
-
-                Log.i("TAGjj", "bindSettingPan: ${cast.castingState.value}")
                 if (fromUser) {
                     customPlayerView.seek(progress)
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
@@ -270,18 +274,17 @@ class CustomPlayerView(
 
     var countDown: CountDownTimer? = null
     var VisibilityTime = 2000
-    private fun sec3Timer() {
+    private fun sec3Timer(customPlayerView: CustomPlayerViewModel) {
         visibilityComponents(VISIBLE)
         countDown?.cancel()
         countDown = object : CountDownTimer(VisibilityTime.toLong(), 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                //5 ,4 , 3, 2, 1
                 Log.d("TAG", "starting nuclear in " + millisUntilFinished / 1000)
             }
 
             override fun onFinish() {
                 visibilityComponents(GONE)
-                //finish code
+                customPlayerView.disableTouch.value = false
             }
         }.start()
     }
@@ -292,9 +295,10 @@ class CustomPlayerView(
         mSubtitleAudio!!.visibility = isVisible
         mTitle!!.visibility = isVisible
         contentSeekBar!!.visibility = isVisible
+        tvTime!!.visibility = isVisible
         playToggle!!.visibility = isVisible
 //        fullscreenToggle!!.visibility = isVisible
-//        ZoomInOut!!.visibility = isVisible
+        ZoomInOut!!.visibility = isVisible
         ivChromeCast!!.visibility = isVisible
         mNextEpisode!!.visibility = isVisible
         ivFastForward15!!.visibility = isVisible
@@ -302,8 +306,7 @@ class CustomPlayerView(
     }
 
     private fun AlertDialogPlayer(customPlayerView: CustomPlayerViewModel, FLAG: Int) {
-        val dialog = Dialog(context) // where "this" is the context
-
+        val dialog = Dialog(context)
         val binding: DialogPlayrateSubtitleBinding =
             DataBindingUtil.inflate(
                 dialog.layoutInflater,
@@ -407,7 +410,10 @@ class CustomPlayerView(
         }
     }
 
-    private fun AlertDialogCast(customPlayerView: CustomPlayerViewModel, cast: CastingMenuViewModel,listRoutes : List<MediaRouter.RouteInfo>) {
+    private fun AlertDialogCast(
+        cast: CastingMenuViewModel,
+        listRoutes: List<MediaRouter.RouteInfo>
+    ) {
         val dialog = Dialog(context) // where "this" is the context
 
         val binding: DialogCastBinding =
@@ -419,15 +425,18 @@ class CustomPlayerView(
             )
 
         binding.tvDone.text = context.getString(R.string.cancel)
-        val adapter = CastSelectAdapter(context, listRoutes, object : CastSelectAdapter.CastDevicesInterface {
-            override fun onConnect(data: MediaRouter.RouteInfo,position: Int) {
-                Log.i("TAGop", "onConnect: ${cast.castingState.value}")
-                dialog.dismiss()
-                cast.beginCasting(data)
-            }
-        })
-
+        val adapter =
+            CastSelectAdapter(context, listRoutes, object : CastSelectAdapter.CastDevicesInterface {
+                override fun onConnect(data: MediaRouter.RouteInfo, position: Int) {
+                    dialog.dismiss()
+                    cast.beginCasting(data)
+                }
+            })
         binding.adapterCast = adapter
+
+        if(listRoutes.isEmpty()) {
+            binding.tvMessage.visibility = VISIBLE
+        }
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
@@ -438,7 +447,45 @@ class CustomPlayerView(
         dialog.show()
     }
 
-    private fun dismissDialog(dialog: Dialog) {
-        dialog.dismiss()
+    override fun onSessionEnded(p0: CastSession, p1: Int) {
+        Log.i("TAG", "onSessionEnded")
     }
+
+    override fun onSessionEnding(p0: CastSession) {
+        Log.i("TAG", "onSessionEnding")
+    }
+
+    override fun onSessionResumeFailed(p0: CastSession, p1: Int) {
+        Log.i("TAG", "onSessionResumeFailed")
+    }
+
+    override fun onSessionResumed(p0: CastSession, p1: Boolean) {
+        Log.i("TAG", "onSessionResumed")
+    }
+
+    override fun onSessionResuming(p0: CastSession, p1: String) {
+        Log.i("TAG", "onSessionResuming")
+    }
+
+    override fun onSessionStartFailed(p0: CastSession, p1: Int) {
+        Log.i("TAG", "onSessionStartFailed")
+    }
+
+    override fun onSessionStarted(p0: CastSession, p1: String) {
+        Log.i("TAG", "onSessionStarted")
+    }
+
+    override fun onSessionStarting(p0: CastSession) {
+        Log.i("TAG", "onSessionStarting")
+    }
+
+    override fun onSessionSuspended(p0: CastSession, p1: Int) {
+        Log.i("TAG", "onSessionSuspended")
+    }
+
+//    public class MyMediaIntentReceiver : MediaIntentReceiver() {
+//        override fun onReceiveOtherAction(action: String, intent: Intent) {
+//
+//        }
+//    }
 }

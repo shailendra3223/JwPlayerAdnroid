@@ -15,10 +15,9 @@ class CastOptionsProvider : OptionsProvider {
         val notificationOptions = NotificationOptions.Builder()
             .setActions(
                 Arrays.asList(
-                    MediaIntentReceiver.ACTION_SKIP_NEXT,
                     MediaIntentReceiver.ACTION_TOGGLE_PLAYBACK,
                     MediaIntentReceiver.ACTION_STOP_CASTING
-                ), intArrayOf(1, 2)
+                ), intArrayOf(0, 1)
             )
             .setTargetActivityClassName(MainActivity::class.java.name)
             .build()

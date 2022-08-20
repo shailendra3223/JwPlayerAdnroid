@@ -37,7 +37,7 @@ class MyControlPan(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         val playlistViewModel = player.getViewModelForUiGroup(UiGroup.PLAYLIST) as PlaylistViewModel
         val customPlayerView = CustomPlayerViewModel(player)
 
-        controlView!!.bindSettingPan(customPlayerView, settingVM, playlistViewModel, playerConfig, lifecycleOwner)
+        controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner)
     }
 
     init {
