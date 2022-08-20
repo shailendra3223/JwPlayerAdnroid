@@ -127,6 +127,7 @@ class CustomPlayerView(
         }
 
         ZoomInOut!!.setOnClickListener {
+            //TODO Shailendre on this button click the video should zoom in n out
             customPlayerView.isVisibility.value = false
             customPlayerView.disableTouch.value = true
 

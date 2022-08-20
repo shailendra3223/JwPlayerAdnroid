@@ -75,10 +75,10 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
             min %= 60
         }
 
-        var hours = if(hr.toString().length == 1) "0${hr}" else hr
-        var minutie = if(min.toString().length == 1) "0${min}" else min
-        var second = if(sec.toString().length == 1) "0${sec}" else sec
-        return ("${hours}:${minutie}:${second}")
+        val hours = if(hr.toString().length == 1) "0${hr}" else hr
+        val minute = if(min.toString().length == 1) "0${min}" else min
+        val second = if(sec.toString().length == 1) "0${sec}" else sec
+        return ("${hours}:${minute}:${second}")
     }
     /**
      * This assumes VOD content only. Does not account for Live and DVR scenarios
