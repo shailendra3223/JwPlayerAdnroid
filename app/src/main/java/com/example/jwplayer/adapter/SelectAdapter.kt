@@ -3,6 +3,7 @@ package com.example.jwplayer.adapter
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
@@ -31,6 +32,7 @@ class SelectAdapter(
             } else if (mFLAG == 1004) {
                 Log.i("TAGlo", "onBind: ${data.valueSubtitle!!.label.toString()}")
                 binding.tvItemName.text = data.valueSubtitle!!.label.toString()
+                binding.view.visibility = GONE
             }
         }
 

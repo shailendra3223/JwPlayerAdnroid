@@ -7,44 +7,45 @@ import android.os.CountDownTimer
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.SeekBar
+import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.mediarouter.media.MediaRouter
 import com.example.jwplayer.adapter.CastSelectAdapter
+import com.example.jwplayer.adapter.PlayListSeasonAdapter
 import com.example.jwplayer.adapter.SelectAdapter
 import com.example.jwplayer.databinding.DialogCastBinding
 import com.example.jwplayer.databinding.DialogPlayrateSubtitleBinding
+import com.example.jwplayer.databinding.FragmentPlayListSeasonBinding
 import com.example.jwplayer.model.SelectItem
 import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
-import com.google.android.gms.cast.framework.media.MediaIntentReceiver
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.UiGroup
 import com.jwplayer.pub.api.configuration.PlayerConfig
+import com.jwplayer.pub.api.configuration.UiConfig
 import com.jwplayer.pub.api.media.adaptive.QualityLevel
 import com.jwplayer.pub.api.media.audio.AudioTrack
 import com.jwplayer.pub.api.media.captions.Caption
+import com.jwplayer.pub.api.media.captions.CaptionType
+import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
 
 
 class CustomPlayerView(
-    context: Context?,
+    mContext: Context?,
     attrs: AttributeSet?,
     defStyleAttr: Int,
     defStyleRes: Int
-) :
-    ConstraintLayout(
-        context!!, attrs, defStyleAttr, defStyleRes
-    ), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession> {
+) : ConstraintLayout(
+    mContext!!, attrs, defStyleAttr, defStyleRes
+), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession> {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
@@ -53,6 +54,7 @@ class CustomPlayerView(
     private var tvTime: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
+
     //    private var fullscreenToggle: ImageView? = null
     private var ZoomInOut: ImageView? = null
     private var ivChromeCast: ImageView? = null
@@ -90,10 +92,12 @@ class CustomPlayerView(
         customPlayerView: CustomPlayerViewModel,
         playlistViewModel: PlaylistViewModel,
         playerConfig: PlayerConfig,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        data: ModelClass
     ) {
         val mCastContext = CastContext.getSharedInstance(context)
-        val cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
+        val cast =
+            customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         customPlayerView.isFirstFrame.observe(lifecycleOwner) { mJWPlayer: JWPlayer ->
             mTitle!!.text = mJWPlayer.playlistItem.mTitle
         }
@@ -115,14 +119,14 @@ class CustomPlayerView(
         mVideoSetting!!.setOnClickListener { v: View? ->
             customPlayerView.isVisibility.value = false
             customPlayerView.disableTouch.value = true
-            customPlayerView.player.pause()
+//            customPlayerView.player.pause()
             AlertDialogPlayer(customPlayerView, 1001)
         }
 
         mSubtitleAudio!!.setOnClickListener { v: View? ->
             customPlayerView.isVisibility.value = false
             customPlayerView.disableTouch.value = true
-            customPlayerView.player.pause()
+//            customPlayerView.player.pause()
             AlertDialogPlayer(customPlayerView, 1003)
         }
 
@@ -156,7 +160,11 @@ class CustomPlayerView(
             customPlayerView.isVisibility.value = false
             customPlayerView.disableTouch.value = true
             Log.i("TAG", "GIOLL1: ${mEpisodes!!.visibility}")
-            playlistViewModel.open()
+
+            AlertDialogPlayList(customPlayerView, data[0].seasons, playerConfig)
+//            playlistViewModel.open()
+//            MainActivity().openPlayList(data[0].seasons)
+//            PlayListSeasonFragment(data[0].seasons).show(mContext.supportFragmentManager, "bottom_sheet")
         }
 
         ivChromeCast!!.setOnClickListener {
@@ -193,7 +201,7 @@ class CustomPlayerView(
 
         ivFastForward15!!.setOnClickListener {
             sec3Timer(customPlayerView)
-            val position = customPlayerView.player.position + 15
+            val position = customPlayerView.player.position + 30
 
             if (position >= customPlayerView.player.duration) {
                 val next = customPlayerView.player.playlistIndex + 1
@@ -212,8 +220,8 @@ class CustomPlayerView(
 
         ivFastBackward15!!.setOnClickListener {
             sec3Timer(customPlayerView)
-            val position = customPlayerView.player.position - 15
-            if (position > 16) {
+            val position = customPlayerView.player.position - 30
+            if (position > 31) {
                 customPlayerView.player.seek(position)
                 customPlayerView.handleTimeUpdate(
                     position,
@@ -245,6 +253,7 @@ class CustomPlayerView(
                     customPlayerView.seek(progress)
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
@@ -307,7 +316,7 @@ class CustomPlayerView(
     }
 
     private fun AlertDialogPlayer(customPlayerView: CustomPlayerViewModel, FLAG: Int) {
-        val dialog = Dialog(context)
+        val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         val binding: DialogPlayrateSubtitleBinding =
             DataBindingUtil.inflate(
                 dialog.layoutInflater,
@@ -348,7 +357,7 @@ class CustomPlayerView(
                     customPlayerView.player.currentCaptions = mPositionSubTitle
                 }
             }
-            customPlayerView.player.play()
+//            customPlayerView.player.play()
             dialog.dismiss()
         }
         dialog.setContentView(binding.root)
@@ -389,7 +398,7 @@ class CustomPlayerView(
     }
 
     init {
-        initView(context)
+        initView(mContext)
     }
 
     var mValuePlayRate: Double = 0.0
@@ -425,7 +434,6 @@ class CustomPlayerView(
                 false
             )
 
-        binding.tvDone.text = context.getString(R.string.cancel)
         val adapter =
             CastSelectAdapter(context, listRoutes, object : CastSelectAdapter.CastDevicesInterface {
                 override fun onConnect(data: MediaRouter.RouteInfo, position: Int) {
@@ -435,15 +443,112 @@ class CustomPlayerView(
             })
         binding.adapterCast = adapter
 
-        if(listRoutes.isEmpty()) {
+        if (listRoutes.isEmpty()) {
             binding.tvMessage.visibility = VISIBLE
         }
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        binding.tvDone.setOnClickListener {
+        binding.tvCancel.setOnClickListener {
             dialog.dismiss()
         }
+        dialog.setContentView(binding.root)
+        dialog.show()
+    }
+
+    var positionSeason = 1
+    private fun AlertDialogPlayList(
+        customPlayerView: CustomPlayerViewModel,
+        season: List<Season>,
+        playerConfig: PlayerConfig
+    ) {
+        val dialog = Dialog(
+            context,
+            android.R.style.Theme_Black_NoTitleBar_Fullscreen
+        ) // where "this" is the context
+
+        val binding: FragmentPlayListSeasonBinding =
+            DataBindingUtil.inflate(
+                dialog.layoutInflater,
+                R.layout.fragment_play_list_season,
+                null,
+                false
+            )
+
+        val listSeason = ArrayList<String>()
+        for (i in season.indices) {
+            listSeason.add("Season ${i + 1}")
+        }
+
+        val adapterSpinner =
+            ArrayAdapter(context, R.layout.layout_textview, listSeason)
+        binding.spSeason.adapter = adapterSpinner
+
+        binding.spSeason.setSelection(positionSeason)
+        binding.spSeason.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+
+                Log.i("TAGvv", "setupPlayer1: ${position} : ${positionSeason}")
+                val adapter = PlayListSeasonAdapter(
+                    context,
+                    season[position].episodes,
+                    object : PlayListSeasonAdapter.CastDevicesInterface {
+                        override fun onVideoClick(data: Episode, posVideo: Int) {
+
+                            val playlist: MutableList<PlaylistItem> = ArrayList()
+                            for (episode in season[position].episodes) {
+                                val caption = Caption.Builder()
+                                    .file("file:///android_asset/press-play-captions.vtt")
+                                    .kind(CaptionType.CAPTIONS)
+                                    .label("en")
+                                    .isDefault(true)
+                                    .build()
+                                val captionList: MutableList<Caption> = ArrayList()
+                                captionList.add(caption)
+
+                                val pi = PlaylistItem.Builder()
+                                    .description(episode.description)
+                                    .file(episode.media)
+                                    .image(episode.original_thumbnail_file)
+                                    .tracks(captionList)
+                                    .title(episode.title)
+                                    .build()
+
+                                playlist.add(pi)
+                            }
+
+                            customPlayerView.player.setup(
+                                PlayerConfig.Builder()
+                                    .playlist(playlist)
+                                    .playlistIndex(posVideo)
+                                    .uiConfig(playerConfig.mUiConfig)
+                                    .autostart(true)
+                                    .build()
+                            )
+
+                            dialog.dismiss()
+                        }
+                    })
+
+                binding.adapterPlayList = adapter
+                positionSeason = position
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        dialog.window?.setBackgroundDrawableResource(R.color.transparent75)
+
+        binding.ivClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
         dialog.setContentView(binding.root)
         dialog.show()
     }

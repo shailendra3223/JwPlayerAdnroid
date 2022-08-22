@@ -9,6 +9,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
+import com.example.jwplayer.fragment.PlayListSeasonFragment
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.common.ConnectionResult
@@ -113,7 +114,6 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
             )
             .stretching(PlayerConfig.STRETCHING_UNIFORM)
             .build()
-        mPlayer!!.exoPlayerSettings.enableChunkLessPreparation();
 
         mPlayer!!.setup(playerConfig)
 
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, playerConfig!!, this)
+        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data)
 
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
 //        val params = FrameLayout.LayoutParams(
@@ -151,6 +151,9 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //        controls.bind(mPlayer!!, this)
     }
 
+    public fun openPlayList(season: List<Season>) {
+        PlayListSeasonFragment(season).show(supportFragmentManager, "bottom_sheet")
+    }
 
     // Without the Google API's Chromecast won't work
     private fun isGoogleApiAvailable(context: Context): Boolean {

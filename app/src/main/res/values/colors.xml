@@ -8,8 +8,13 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="white1">#D5D5D5</color>
+    <color name="white75">#BFFFFFFF</color>
+    <color name="white25">#40FFFFFF</color>
     <color name="tint">#80191919</color>
+    <color name="transparent10">#1A000000</color>
     <color name="transparent25">#40000000</color>
+    <color name="transparent50">#80000000</color>
+    <color name="transparent75">#BF000000</color>
     <color name="stroke">#66FFD983</color>
     <color name="red">#D10A0A</color>
     <color name="skyblue">#56A7FF</color>

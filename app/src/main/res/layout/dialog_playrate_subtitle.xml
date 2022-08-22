@@ -20,9 +20,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/transparent25"
-        android:minWidth="450dp"
-        android:minHeight="300dp"
+        android:background="@color/transparent75"
         android:padding="12dp">
 
         <TextView
@@ -32,6 +30,7 @@
             android:text="Done"
             android:textColor="@color/white"
             android:textSize="16sp"
+            android:layout_margin="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -64,6 +63,7 @@
             android:layout_width="160dp"
             android:layout_height="0dp"
             android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="16dp"
             android:adapter="@{adapterPlayRate}"
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -77,6 +77,7 @@
             android:layout_width="200dp"
             android:layout_height="0dp"
             android:layout_marginStart="12dp"
+            android:layout_marginVertical="16dp"
             android:layout_marginEnd="4dp"
             android:adapter="@{adapterQuality}"
             android:orientation="vertical"
@@ -102,17 +103,22 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_cast"
-            android:layout_width="250dp"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginVertical="16dp"
             android:adapter="@{adapterCast}"
+            android:background="@color/white"
+            android:minWidth="300dp"
             android:orientation="vertical"
+            app:layout_constraintHorizontal_bias="0"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvCasting" />
+            app:layout_constraintTop_toBottomOf="@+id/tvCasting"
+            tools:listitem="@layout/layout_radio" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
