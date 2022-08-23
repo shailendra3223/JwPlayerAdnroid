@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
@@ -59,6 +60,10 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         if (isGoogleApiAvailable(this)) {
             mCastContext = CastContext.getSharedInstance(applicationContext)
         }
+
+//        window.decorView.apply {
+//            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+//        }
 
 //        mPlayerView!!.onTouchEvent(MotionEvent.ACTION_MASK)
     }

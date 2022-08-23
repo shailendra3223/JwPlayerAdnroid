@@ -28,7 +28,6 @@ import com.google.android.gms.cast.framework.SessionManagerListener
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.UiGroup
 import com.jwplayer.pub.api.configuration.PlayerConfig
-import com.jwplayer.pub.api.configuration.UiConfig
 import com.jwplayer.pub.api.media.adaptive.QualityLevel
 import com.jwplayer.pub.api.media.audio.AudioTrack
 import com.jwplayer.pub.api.media.captions.Caption
@@ -78,7 +77,7 @@ class CustomPlayerView(
         mNextEpisode = findViewById(R.id.tv_next_episode)
         contentSeekBar = findViewById(R.id.seekbar)
         playToggle = findViewById(R.id.play_pause_toggle)
-//        fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
+//      fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
         mTitle = findViewById(R.id.tv_title)
         ZoomInOut = findViewById(R.id.iv_zoom_in_out)
         ivChromeCast = findViewById(R.id.iv_chrome_cast)
@@ -107,64 +106,68 @@ class CustomPlayerView(
         }
 
         customPlayerView.isVisibility.observe(lifecycleOwner) {
-            if (it && customPlayerView.disableTouch.value != true) {
-                sec3Timer(customPlayerView)
-            } else {
-                visibilityComponents(GONE)
-                customPlayerView.disableTouch.value = false
-            }
-            Log.i("TAG", "GIOLL2: ${mEpisodes!!.visibility}")
+
+            sec3Timer(customPlayerView)
+
+//            if (it) {
+//                sec3Timer(customPlayerView)
+//            } else {
+//                visibilityComponents(GONE)
+////                customPlayerView.disableTouch.value = false
+//            }
         }
 
         mVideoSetting!!.setOnClickListener { v: View? ->
-            customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch.value = true
+//            customPlayerView.isVisibility.value = false
+//            customPlayerView.disableTouch.value = true
 //            customPlayerView.player.pause()
+            visibilityComponents(GONE)
             AlertDialogPlayer(customPlayerView, 1001)
         }
 
         mSubtitleAudio!!.setOnClickListener { v: View? ->
-            customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch.value = true
+//            customPlayerView.isVisibility.value = false
+//            customPlayerView.disableTouch.value = true
 //            customPlayerView.player.pause()
+            visibilityComponents(GONE)
             AlertDialogPlayer(customPlayerView, 1003)
         }
 
         ZoomInOut!!.setOnClickListener {
             //TODO Shailendre on this button click the video should zoom in n out
-            customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch.value = true
+//            customPlayerView.isVisibility.value = false
+//            customPlayerView.disableTouch.value = true
+//
+//            val mPosition = customPlayerView.player.position
+//            Log.i("TAG", "IOKLL1: ${mPosition}")
+//            val enlarge =
+//                if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
+//                    PlayerConfig.STRETCHING_UNIFORM
+//                } else {
+//                    PlayerConfig.STRETCHING_EXACT_FIT
+//                }
+//            customPlayerView.player.setup(
+//                PlayerConfig.Builder()
+//                    .playlist(playerConfig.playlist)
+//                    .uiConfig(playerConfig.mUiConfig)
+//                    .stretching(enlarge)
+//                    .autostart(true)
+//                    .build()
+//            )
+            if (customPlayerView.player.fullscreen) {
+                customPlayerView.player.setFullscreen(true, false)
+            } else {
+                customPlayerView.player.setFullscreen(false, false)
+            }
+//            customPlayerView.player.setFullscreen(true)
 
-            val mPosition = customPlayerView.player.position
-            Log.i("TAG", "IOKLL1: ${mPosition}")
-            val enlarge =
-                if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
-                    PlayerConfig.STRETCHING_UNIFORM
-                } else {
-                    PlayerConfig.STRETCHING_EXACT_FIT
-                }
-            customPlayerView.player.setup(
-                PlayerConfig.Builder()
-                    .playlist(playerConfig.playlist)
-                    .uiConfig(playerConfig.mUiConfig)
-                    .stretching(enlarge)
-                    .autostart(true)
-                    .build()
-            )
-            customPlayerView.player.seek(mPosition)
-
-            Log.i("TAG", "IOKLL2: ${customPlayerView.player.position}")
         }
 
         mEpisodes!!.setOnClickListener {
-            customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch.value = true
-            Log.i("TAG", "GIOLL1: ${mEpisodes!!.visibility}")
-
+            visibilityComponents(GONE)
+//            customPlayerView.isVisibility.value = false
+//            customPlayerView.disableTouch.value = true
             AlertDialogPlayList(customPlayerView, data[0].seasons, playerConfig)
-//            playlistViewModel.open()
-//            MainActivity().openPlayList(data[0].seasons)
-//            PlayListSeasonFragment(data[0].seasons).show(mContext.supportFragmentManager, "bottom_sheet")
         }
 
         ivChromeCast!!.setOnClickListener {
@@ -185,8 +188,6 @@ class CustomPlayerView(
             }
 
             AlertDialogCast(cast, isCastRoutes)
-
-//            CastStateListener mCastStateListener
             mCastContext.sessionManager.addSessionManagerListener(this, CastSession::class.java)
         }
 
@@ -199,50 +200,51 @@ class CustomPlayerView(
             }
         }
 
-        ivFastForward15!!.setOnClickListener {
-            sec3Timer(customPlayerView)
-            val position = customPlayerView.player.position + 30
+//        ivFastForward15!!.setOnClickListener {
+//            sec3Timer(customPlayerView)
+//            val position = customPlayerView.player.position + 30
+//
+//            if (position >= customPlayerView.player.duration) {
+//                val next = customPlayerView.player.playlistIndex + 1
+//                if (next != customPlayerView.player.playlist.size) {
+//                    customPlayerView.player.playlistItem(next)
+//                }
+//            } else if (position >= 0) {
+//                customPlayerView.player.seek(position)
+//                customPlayerView.handleTimeUpdate(
+//                    position,
+//                    customPlayerView.player.duration,
+//                    customPlayerView.contentProgressPercentage
+//                )
+//            }
+//        }
 
-            if (position >= customPlayerView.player.duration) {
-                val next = customPlayerView.player.playlistIndex + 1
-                if (next != customPlayerView.player.playlist.size) {
-                    customPlayerView.player.playlistItem(next)
-                }
-            } else if (position >= 0) {
-                customPlayerView.player.seek(position)
-                customPlayerView.handleTimeUpdate(
-                    position,
-                    customPlayerView.player.duration,
-                    customPlayerView.contentProgressPercentage
-                )
-            }
-        }
-
-        ivFastBackward15!!.setOnClickListener {
-            sec3Timer(customPlayerView)
-            val position = customPlayerView.player.position - 30
-            if (position > 31) {
-                customPlayerView.player.seek(position)
-                customPlayerView.handleTimeUpdate(
-                    position,
-                    customPlayerView.player.duration,
-                    customPlayerView.contentProgressPercentage
-                )
-            } else {
-                customPlayerView.player.seek(0.1)
-                customPlayerView.handleTimeUpdate(
-                    0.1,
-                    customPlayerView.player.duration,
-                    customPlayerView.contentProgressPercentage
-                )
-            }
-        }
+//        ivFastBackward15!!.setOnClickListener {
+//            sec3Timer(customPlayerView)
+//            val position = customPlayerView.player.position - 30
+//            if (position > 31) {
+//                customPlayerView.player.seek(position)
+//                customPlayerView.handleTimeUpdate(
+//                    position,
+//                    customPlayerView.player.duration,
+//                    customPlayerView.contentProgressPercentage
+//                )
+//            } else {
+//                customPlayerView.player.seek(0.1)
+//                customPlayerView.handleTimeUpdate(
+//                    0.1,
+//                    customPlayerView.player.duration,
+//                    customPlayerView.contentProgressPercentage
+//                )
+//            }
+//        }
 
 
         //SeekBar
         customPlayerView.contentProgressPercentage.observe(lifecycleOwner) { progress ->
             contentSeekBar!!.progress = progress
         }
+
         customPlayerView.isSeekbarVisible.observe(lifecycleOwner) { isVisible ->
             contentSeekBar!!.visibility = if (isVisible) VISIBLE else GONE
             tvTime!!.visibility = if (isVisible) VISIBLE else GONE
@@ -311,8 +313,8 @@ class CustomPlayerView(
         ZoomInOut!!.visibility = isVisible
         ivChromeCast!!.visibility = isVisible
         mNextEpisode!!.visibility = isVisible
-        ivFastForward15!!.visibility = isVisible
-        ivFastBackward15!!.visibility = isVisible
+//        ivFastForward15!!.visibility = isVisible
+//        ivFastBackward15!!.visibility = isVisible
     }
 
     private fun AlertDialogPlayer(customPlayerView: CustomPlayerViewModel, FLAG: Int) {
@@ -330,7 +332,6 @@ class CustomPlayerView(
             val qualityLevel = ArrayList(customPlayerView.player.qualityLevels)
             binding.adapterQuality = setQualityLevel(qualityLevel)
         } else if (FLAG == 1003) {
-            Log.i("TAG", "AlertDialogPlayer: ${customPlayerView.player.captionsList.size}")
             val subtitleList = ArrayList(customPlayerView.player.captionsList)
             binding.adapterPlayRate = setSubtitle(subtitleList)
             binding.rvQualityLevel.visibility = GONE
@@ -354,7 +355,8 @@ class CustomPlayerView(
 //                    customPlayerView.player.currentAudioTrack = mValueAudio.
 //                }
                 if (mValueSubtitle != null) {
-                    customPlayerView.player.currentCaptions = mPositionSubTitle
+//                    customPlayerView.player.setCurrentCaptions(mValueSubtitle!!.label)
+                    customPlayerView.player.setCurrentCaptions(mPositionSubTitle)
                 }
             }
 //            customPlayerView.player.play()
@@ -366,17 +368,36 @@ class CustomPlayerView(
 
     private fun setPlayRateData(): SelectAdapter {
         val list = ArrayList<SelectItem>()
-        val playbackRates = doubleArrayOf(0.5, 1.0, 1.5, 2.0)
+        val playbackRates = doubleArrayOf(0.25, 0.5, 1.0, 1.25, 1.5, 2.0)
         for (item in playbackRates) {
-            list.add(SelectItem(item, null, null, null, false))
+            val isSelect = mValuePlayRate == item
+            list.add(SelectItem(item, null, null, null, isSelect))
         }
         return SelectAdapter(context, list, 1001, this)
     }
 
     private fun setQualityLevel(qualityLevel: ArrayList<QualityLevel>): SelectAdapter {
         val list = ArrayList<SelectItem>()
+        var isFHD = true
+        var isHD = true
+        var isSD = true
         for (item in qualityLevel) {
-            list.add(SelectItem(0.0, item, null, null, false))
+
+            val isSelect = (mValueQuality != null && mValueQuality!!.trackIndex == item.trackIndex)
+
+            if(item.label.toString().contains("Auto")) {
+                list.add(SelectItem(0.0, item, null, null, isSelect))
+            } else if(item.label.toString().contains("1080p") && isFHD) {
+                isFHD = false
+                list.add(SelectItem(0.0, item, null, null, isSelect))
+            } else if(item.label.toString().contains("720p") && isHD) {
+                isHD = false
+                list.add(SelectItem(0.0, item, null, null, isSelect))
+            } else if(item.label.toString().contains("360p") && isSD) {
+                isSD = false
+                list.add(SelectItem(0.0, item, null, null, isSelect))
+            }
+
         }
         return SelectAdapter(context, list, 1002, this)
     }
@@ -392,7 +413,14 @@ class CustomPlayerView(
     private fun setSubtitle(caption: ArrayList<Caption>): SelectAdapter {
         val list = ArrayList<SelectItem>()
         for (item in caption) {
-            list.add(SelectItem(0.0, null, null, item, false))
+
+            val isSelect = mPositionSubTitle == 0
+
+            if (item.label.equals("Off")) {
+                list.add(SelectItem(0.0, null, null, item, isSelect))
+            } else if (item.label.equals("en")) {
+                list.add(SelectItem(0.0, null, null, item, !isSelect))
+            }
         }
         return SelectAdapter(context, list, 1004, this)
     }
@@ -493,8 +521,6 @@ class CustomPlayerView(
                 position: Int,
                 id: Long
             ) {
-
-                Log.i("TAGvv", "setupPlayer1: ${position} : ${positionSeason}")
                 val adapter = PlayListSeasonAdapter(
                     context,
                     season[position].episodes,

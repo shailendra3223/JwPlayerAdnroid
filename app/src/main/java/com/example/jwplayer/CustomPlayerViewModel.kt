@@ -38,7 +38,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     override fun onReady(readyEvent: ReadyEvent) {
         Log.d("TAG", "onReady")
-        updateContentUi()
+//        updateContentUi()
     }
 
     override fun onFirstFrame(firstFrameEvent: FirstFrameEvent) {
@@ -221,8 +221,8 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     override fun onDisplayClick(click: DisplayClickEvent) {
-        if (!disableTouch.value!!) {
+//        if (!disableTouch.value!!) {
             isVisibility.value = !isVisibility.value!!
-        }
+//        }
     }
 }

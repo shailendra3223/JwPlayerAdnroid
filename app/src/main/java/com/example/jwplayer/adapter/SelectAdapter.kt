@@ -26,13 +26,33 @@ class SelectAdapter(
     class SelectedViewHolder(var binding: LayoutRadioBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind(data: SelectItem, position: Int, mFLAG: Int) {
             if (mFLAG == 1001) {
-                binding.tvItemName.text = data.valuePlayRate.toString()
+                binding.tvItemName.text = "Speed(${data.valuePlayRate}x)"
             } else if (mFLAG == 1002) {
-                binding.tvItemName.text = data.valueQuality!!.label.toString()
+
+                val label = if(data.valueQuality!!.label.toString().contains("Auto")) {
+                    "Auto"
+                } else if(data.valueQuality!!.label.toString().contains("1080p")) {
+                    "FHD"
+                } else if(data.valueQuality!!.label.toString().contains("720p")) {
+                    "HD"
+                } else if(data.valueQuality!!.label.toString().contains("360p")) {
+                    "SD"
+                } else ""
+
+                binding.tvItemName.text = label
+
+//                binding.tvItemName.text = data.valueQuality!!.label.toString()
             } else if (mFLAG == 1004) {
-                Log.i("TAGlo", "onBind: ${data.valueSubtitle!!.label.toString()}")
-                binding.tvItemName.text = data.valueSubtitle!!.label.toString()
-                binding.view.visibility = GONE
+
+//                binding.view.visibility = GONE
+
+                if(data.valueSubtitle!!.label.toString().contains("en")) {
+                    binding.tvItemName.text = "English"
+                } else {
+                    binding.tvItemName.text = data.valueSubtitle!!.label.toString()
+                }
+
+
             }
         }
 
