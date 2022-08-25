@@ -10,6 +10,7 @@ import com.jwplayer.pub.api.configuration.PlayerConfig
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
 import com.jwplayer.pub.ui.viewmodels.SettingsMenuViewModel
+import com.jwplayer.pub.view.JWPlayerView
 
 class MyControlPan(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
     ConstraintLayout(
@@ -31,13 +32,13 @@ class MyControlPan(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         controlView = findViewById(R.id.custome_setting_pan)
     }
 
-    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass) {
+    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass, jwplayerView: JWPlayerView) {
         // Bind Views
         val settingVM = player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         val playlistViewModel = player.getViewModelForUiGroup(UiGroup.PLAYLIST) as PlaylistViewModel
         val customPlayerView = CustomPlayerViewModel(player)
 
-        controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner, data)
+        controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner, data, jwplayerView)
     }
 
     init {

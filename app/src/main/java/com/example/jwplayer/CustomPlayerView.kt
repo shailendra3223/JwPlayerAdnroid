@@ -35,6 +35,7 @@ import com.jwplayer.pub.api.media.captions.CaptionType
 import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
+import com.jwplayer.pub.view.JWPlayerView
 
 
 class CustomPlayerView(
@@ -92,7 +93,8 @@ class CustomPlayerView(
         playlistViewModel: PlaylistViewModel,
         playerConfig: PlayerConfig,
         lifecycleOwner: LifecycleOwner,
-        data: ModelClass
+        data: ModelClass,
+        jwplayerView: JWPlayerView
     ) {
         val mCastContext = CastContext.getSharedInstance(context)
         val cast =
@@ -133,34 +135,14 @@ class CustomPlayerView(
             AlertDialogPlayer(customPlayerView, 1003)
         }
 
-        ZoomInOut!!.setOnClickListener {
-            //TODO Shailendre on this button click the video should zoom in n out
-//            customPlayerView.isVisibility.value = false
-//            customPlayerView.disableTouch.value = true
-//
-//            val mPosition = customPlayerView.player.position
-//            Log.i("TAG", "IOKLL1: ${mPosition}")
-//            val enlarge =
-//                if (customPlayerView.player.config.mStretching == PlayerConfig.STRETCHING_FILL) {
-//                    PlayerConfig.STRETCHING_UNIFORM
-//                } else {
-//                    PlayerConfig.STRETCHING_EXACT_FIT
-//                }
-//            customPlayerView.player.setup(
-//                PlayerConfig.Builder()
-//                    .playlist(playerConfig.playlist)
-//                    .uiConfig(playerConfig.mUiConfig)
-//                    .stretching(enlarge)
-//                    .autostart(true)
-//                    .build()
-//            )
-            if (customPlayerView.player.fullscreen) {
-                customPlayerView.player.setFullscreen(true, false)
-            } else {
-                customPlayerView.player.setFullscreen(false, false)
-            }
-//            customPlayerView.player.setFullscreen(true)
 
+        ZoomInOut!!.setOnClickListener {
+            if (customPlayerView.player.fullscreen) {
+                ZoomInOut!!.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_aspect_ratio))
+            } else {
+                ZoomInOut!!.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_full_screen))
+            }
+            customPlayerView.toggleFullscreen()
         }
 
         mEpisodes!!.setOnClickListener {

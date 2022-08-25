@@ -50,13 +50,11 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         mPlayerView?.getPlayerAsync(this, this,
             JWPlayer.PlayerInitializationListener { jwPlayer: JWPlayer? ->
                 mPlayer = jwPlayer
-                mPlayer!!.setFullscreenHandler(FullScreenHandlerNoRotation(mPlayerView!!))
+                mPlayer!!.setFullscreenHandler(ZoomHandler(mPlayerView!!))
                 setupPlayer1()
             })
 
-        mPlayerView!!.setOnClickListener {
-            Log.i("fsdhgfshgfdshsd555", "onScale: ${MainActivity().mScaleFactor}")
-        }
+
         if (isGoogleApiAvailable(this)) {
             mCastContext = CastContext.getSharedInstance(applicationContext)
         }
@@ -65,7 +63,8 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
 //        }
 
-//        mPlayerView!!.onTouchEvent(MotionEvent.ACTION_MASK)
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
 
     private fun setupPlayer1() {
@@ -117,7 +116,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
                     .show(UiGroup.PLAYLIST)
                     .build()
             )
-            .stretching(PlayerConfig.STRETCHING_UNIFORM)
+//            .stretching(PlayerConfig.STRETCHING_UNIFORM)
             .build()
 
         mPlayer!!.setup(playerConfig)
@@ -144,8 +143,9 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data)
+        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data, mPlayerView!!)
 
+        mPlayer!!.setFullscreen(true, true)
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
 //        val params = FrameLayout.LayoutParams(
 //            ViewGroup.LayoutParams.MATCH_PARENT,
@@ -154,10 +154,6 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //        controls.layoutParams = params
 //        mPlayerView!!.addView(controls)
 //        controls.bind(mPlayer!!, this)
-    }
-
-    public fun openPlayList(season: List<Season>) {
-        PlayListSeasonFragment(season).show(supportFragmentManager, "bottom_sheet")
     }
 
     // Without the Google API's Chromecast won't work
@@ -259,6 +255,9 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         mPlayerView!!.addView(controls)
         controls.bind(mPlayer!!, this)
     }
+
+
+
 }
 
 
