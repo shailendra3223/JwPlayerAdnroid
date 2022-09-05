@@ -7,7 +7,7 @@
     android:background="@color/black"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
-    <com.example.jwplayer.CustomPlayerView
+    <com.google.sample.cast.refplayer.CustomPlayerView
         android:id="@+id/custome_setting_pan"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -6,7 +6,7 @@
     <data>
         <variable
             name="adapterPlayList"
-            type="com.example.jwplayer.adapter.PlayListSeasonAdapter" />
+            type="com.google.sample.cast.refplayer.adapter.PlayListSeasonAdapter" />
 
     </data>
 
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/transparent50"
-        tools:context=".fragment.PlayListSeasonFragment">
+        tools:context="com.google.sample.cast.refplayer.fragment.PlayListSeasonFragment">
 
         <ImageView
             android:id="@+id/iv_close"

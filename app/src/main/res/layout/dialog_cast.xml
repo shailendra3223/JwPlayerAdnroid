@@ -6,7 +6,7 @@
     <data>
         <variable
             name="adapterCast"
-            type="com.example.jwplayer.adapter.CastSelectAdapter" />
+            type="com.google.sample.cast.refplayer.adapter.CastSelectAdapter" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/cancel"
-                android:textColor="@color/skyblue"
+                android:textColor="@color/primary"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -57,6 +57,7 @@
                 android:minWidth="300dp"
                 tools:listitem="@layout/layout_cast"
                 tools:itemCount="3"
+                tools:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -68,12 +69,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/no_devices_found"
-                android:textColor="@color/skyblue"
+                android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDisconnectDevicesName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Device Name"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:visibility="gone"
+                app:layout_constraintHorizontal_bias="0.1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDisconnect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:text="@string/disconnect"
+                android:textColor="@color/primary"
+                android:textSize="18sp"
+                android:visibility="gone"
+                app:layout_constraintHorizontal_bias="0.8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/tvDisconnectDevicesName"
                 app:layout_constraintTop_toTopOf="parent" />
 
 

@@ -6,15 +6,15 @@
     <data>
         <variable
             name="adapterPlayRate"
-            type="com.example.jwplayer.adapter.SelectAdapter" />
+            type="com.google.sample.cast.refplayer.adapter.SelectAdapter" />
 
         <variable
             name="adapterQuality"
-            type="com.example.jwplayer.adapter.SelectAdapter" />
+            type="com.google.sample.cast.refplayer.adapter.SelectAdapter" />
 
         <variable
-            name="adapterCast"
-            type="com.example.jwplayer.adapter.CastSelectAdapter" />
+            name="adapterSubtitle"
+            type="com.google.sample.cast.refplayer.adapter.SelectAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -100,25 +100,22 @@
             app:layout_constraintStart_toStartOf="@+id/rv_play_rate"
             app:layout_constraintTop_toBottomOf="@+id/tvDone" />
 
-
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_cast"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="16dp"
-            android:adapter="@{adapterCast}"
-            android:background="@color/white"
-            android:minWidth="300dp"
+            android:id="@+id/rv_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_marginVertical="8dp"
+            android:adapter="@{adapterSubtitle}"
             android:orientation="vertical"
-            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintVertical_bias="0.0"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rv_quality_level"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvCasting"
-            tools:listitem="@layout/layout_radio" />
+            app:layout_constraintTop_toBottomOf="@+id/tvPlayRate" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

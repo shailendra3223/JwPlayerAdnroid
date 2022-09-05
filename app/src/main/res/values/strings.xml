@@ -9,5 +9,9 @@
     <string name="connect_your_device">Connect Your Device</string>
     <string name="cancel">Cancel</string>
     <string name="no_devices_found">No Devices Found</string>
+    <string name="disconnect">Disconnect</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="media_route_menu_title">Play on&#8230;</string>
+
+    <string name="app_id">C0868879</string>
 </resources>

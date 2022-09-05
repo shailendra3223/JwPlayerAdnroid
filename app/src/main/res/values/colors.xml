@@ -17,5 +17,8 @@
     <color name="transparent75">#BF000000</color>
     <color name="stroke">#66FFD983</color>
     <color name="red">#D10A0A</color>
-    <color name="skyblue">#56A7FF</color>
+    <color name="primary">#56A7FF</color>
+    <color name="accent">#E8A90A</color>
+    <color name="primary_dark">#054D9A</color>
+    <color name="bg_swipe_item_right">#ffdb4437</color>
 </resources>
