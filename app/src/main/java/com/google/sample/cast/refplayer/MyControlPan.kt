@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.cast.framework.CastContext
 import com.google.sample.cast.refplayer.R
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.UiGroup
@@ -32,13 +33,13 @@ class MyControlPan(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         controlView = findViewById(R.id.custome_setting_pan)
     }
 
-    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass, jwplayerView: JWPlayerView) {
+    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass, jwplayerView: JWPlayerView, mCastContext: CastContext) {
         // Bind Views
         val settingVM = player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         val playlistViewModel = player.getViewModelForUiGroup(UiGroup.PLAYLIST) as PlaylistViewModel
         val customPlayerView = CustomPlayerViewModel(player)
 
-        controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner, data, jwplayerView)
+        controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner, data, jwplayerView, mCastContext)
     }
 
     init {

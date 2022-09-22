@@ -54,7 +54,7 @@ class CustomPlayerView(
     defStyleRes: Int
 ) : ConstraintLayout(
     mContext!!, attrs, defStyleAttr, defStyleRes
-), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession> /*ControlButtonsContainer*/ {
+), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession>, CastStateListener, AppVisibilityListener /*ControlButtonsContainer*/ {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
@@ -63,6 +63,7 @@ class CustomPlayerView(
     private var tvTime: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
+    private var TAG = "CustomPlayerView:Class"
 
     //    private var fullscreenToggle: ImageView? = null
     private var ZoomInOut: ImageView? = null
@@ -111,16 +112,18 @@ class CustomPlayerView(
         playerConfig: PlayerConfig,
         lifecycleOwner: LifecycleOwner,
         data: ModelClass,
-        jwplayerView: JWPlayerView
+        jwplayerView: JWPlayerView,
+        castContext: CastContext
     ) {
 
-        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton!!)
-        mCastContext = CastContext.getSharedInstance(context)
+        mCastContext = castContext;
+        CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
+        mCastContext!!.addCastStateListener(this)
+        mCastContext!!.addAppVisibilityListener(this)
         mCastSession = mCastContext!!.sessionManager.currentCastSession
         mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
 
-        cast =
-            customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
+        cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
 
         val mEpisode = data[0].seasons[positionSeason].episodes[positionEpisode]
 //        val jsonObj: JSONObject = VideoProvider().parseUrl(mEpisode.media)
@@ -218,11 +221,8 @@ class CustomPlayerView(
 
             if (mCastSession != null) {
                 if (mCastSession!!.isConnected) {
-                    Log.i("TAGjk", "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
-                    Log.i(
-                        "TAGjk",
-                        "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
-                    )
+                    Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
+                    Log.i(TAG, "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}")
                     AalertDialogDisconnectCast(cast!!, mCastSession!!)
                 } else {
                     remoteMediaClient = mCastSession!!.remoteMediaClient
@@ -230,9 +230,9 @@ class CustomPlayerView(
                     val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
 
                     movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
-//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
+//                  movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
                     movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
-//        movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
+//                  movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
 
                     mSelectedMedia = MediaInfo.Builder(mEpisode.media)
                         .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
@@ -244,12 +244,16 @@ class CustomPlayerView(
 //                    remoteMediaClient!!.load(MediaLoadRequestData.Builder().setMediaInfo(mSelectedMedia).build())
 
                     loadRemoteMedia(0, true)
-
                     AlertDialogCast(cast!!, isCastRoutes)
-
                 }
 
             } else {
+                mCastContext = CastContext.getSharedInstance(context)
+                CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
+                mCastContext!!.addCastStateListener(this)
+                mCastContext!!.addAppVisibilityListener(this)
+                mCastSession = mCastContext!!.sessionManager.currentCastSession
+                mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
                 AlertDialogCast(cast!!, isCastRoutes)
             }
         }
@@ -359,7 +363,7 @@ class CustomPlayerView(
         countDown?.cancel()
         countDown = object : CountDownTimer(VisibilityTime.toLong(), 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("TAG", "starting nuclear in " + millisUntilFinished / 1000)
+                Log.d(TAG, "Timer " + millisUntilFinished / 1000)
             }
 
             override fun onFinish() {
@@ -590,7 +594,7 @@ class CustomPlayerView(
         dialog.show()
     }
 
-    var positionSeason = 1
+    var positionSeason = 0
     var positionEpisode = 0
     private fun AlertDialogPlayList(
         customPlayerView: CustomPlayerViewModel,
@@ -692,42 +696,42 @@ class CustomPlayerView(
     }
 
     override fun onSessionEnded(session: CastSession, p1: Int) {
-        Log.i("TAG", "onSessionEnded")
+        Log.i(TAG, "onSessionEnded")
     }
 
     override fun onSessionEnding(session: CastSession) {
-        Log.i("TAG", "onSessionEnding")
+        Log.i(TAG, "onSessionEnding")
     }
 
     override fun onSessionResumeFailed(session: CastSession, p1: Int) {
-        Log.i("TAG", "onSessionResumeFailed")
+        Log.i(TAG, "onSessionResumeFailed")
     }
 
     override fun onSessionResumed(session: CastSession, p1: Boolean) {
-        Log.i("TAG", "onSessionResumed")
+        Log.i(TAG, "onSessionResumed")
         onApplicationConnected(session)
     }
 
     override fun onSessionResuming(session: CastSession, p1: String) {
-        Log.i("TAG", "onSessionResuming")
+        Log.i(TAG, "onSessionResuming")
 
     }
 
     override fun onSessionStartFailed(session: CastSession, p1: Int) {
-        Log.i("TAG", "onSessionStartFailed")
+        Log.i(TAG, "onSessionStartFailed")
     }
 
     override fun onSessionStarted(session: CastSession, p1: String) {
-        Log.i("TAG", "onSessionStarted")
+        Log.i(TAG, "onSessionStarted")
         onApplicationConnected(session)
     }
 
     override fun onSessionStarting(session: CastSession) {
-        Log.i("TAG", "onSessionStarting")
+        Log.i(TAG, "onSessionStarting")
     }
 
     override fun onSessionSuspended(session: CastSession, p1: Int) {
-        Log.i("TAG", "onSessionSuspended")
+        Log.i(TAG, "onSessionSuspended")
     }
 
     private var mIntroductoryOverlay: IntroductoryOverlay? = null
@@ -764,7 +768,7 @@ class CustomPlayerView(
         remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
             override fun onStatusUpdated() {
                 Toast.makeText(context, "STARTA", Toast.LENGTH_LONG).show()
-                val intent = Intent(context, com.google.sample.cast.refplayer.cast.ExpandedControlsActivity::class.java)
+                val intent = Intent(context, ExpandedControlsActivity::class.java)
                 context.startActivity(intent)
                 remoteMediaClient!!.unregisterCallback(this)
             }
@@ -810,6 +814,21 @@ class CustomPlayerView(
             .setMediaTracks(tracks)
             .build()
 
+    }
+
+    override fun onCastStateChanged(point: Int) {
+//        TODO("Not yet implemented")
+        Log.i(TAG, "onCastStateChanged: $point")
+    }
+
+    override fun onAppEnteredBackground() {
+//        TODO("Not yet implemented")
+        Log.i(TAG, "onAppEnteredBackground:")
+    }
+
+    override fun onAppEnteredForeground() {
+//        TODO("Not yet implemented")
+        Log.i(TAG, "onAppEnteredForeground:")
     }
 
 //    override fun getButtonSlotCount(): Int {

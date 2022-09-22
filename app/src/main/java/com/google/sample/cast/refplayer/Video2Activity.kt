@@ -42,7 +42,7 @@ import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.view.JWPlayerView
 
 
-class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener {
+class Video2Activity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener {
     var mPlayerView: JWPlayerView? = null
     private var mPlayer: JWPlayer? = null
 
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     var remoteMediaClient: RemoteMediaClient? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_video2)
 //
 //        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 //        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     var positionEpisode = 0
     private fun setupPlayer1() {
         // Handle hiding/showing of ActionBar
-        mPlayer!!.addListener(EventType.FULLSCREEN, this@MainActivity)
+        mPlayer!!.addListener(EventType.FULLSCREEN, this@Video2Activity)
 //        mPlayer!!.setPlaylistItemCallbackListener { playlistItemDecision, playlistItem, i ->
 //            Log.i("TAGvv", "setupPlayer9: ${ i}")
 //        }
@@ -242,84 +242,84 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 
     override fun onFullscreen(fullscreenEvent: FullscreenEvent) {
         val actionBar = supportActionBar
-       /* if (actionBar != null) {
-//            val isCasting = if (mCastContext != null) mCastContext!!
-//                .castState == CastState.CONNECTED else false
-            if (fullscreenEvent.fullscreen) {
-                actionBar!!.hide()
-            } else {
-                actionBar.show()
-            }
-        }*/
+        /* if (actionBar != null) {
+ //            val isCasting = if (mCastContext != null) mCastContext!!
+ //                .castState == CastState.CONNECTED else false
+             if (fullscreenEvent.fullscreen) {
+                 actionBar!!.hide()
+             } else {
+                 actionBar.show()
+             }
+         }*/
     }
 
-   /* private fun setupPlayer() {
-        // Handle hiding/showing of ActionBar
-        mPlayer!!.addListener(EventType.FULLSCREEN, this)
+    /* private fun setupPlayer() {
+         // Handle hiding/showing of ActionBar
+         mPlayer!!.addListener(EventType.FULLSCREEN, this)
 
-        // Keep the screen on during playback
+         // Keep the screen on during playback
 
-        // Keep the screen on during playback
-        KeepScreenOnHandler(mPlayer!!, window)
+         // Keep the screen on during playback
+         KeepScreenOnHandler(mPlayer!!, window)
 
-        // Load a media source
+         // Load a media source
 
-        // Load a media source
-        val pi = PlaylistItem.Builder()
-            .file("https://d3rlna7iyyu8wu.cloudfront.net/skip_armstrong/skip_armstrong_multi_language_subs.m3u8")
-            .title("Press Play")
-            .image("https://content.jwplatform.com/thumbs/1sc0kL2N.jpg")
-            .description("Press play with JW Player")
-            .build()
+         // Load a media source
+         val pi = PlaylistItem.Builder()
+             .file("https://d3rlna7iyyu8wu.cloudfront.net/skip_armstrong/skip_armstrong_multi_language_subs.m3u8")
+             .title("Press Play")
+             .image("https://content.jwplatform.com/thumbs/1sc0kL2N.jpg")
+             .description("Press play with JW Player")
+             .build()
 
-        val playlist = ArrayList<PlaylistItem>()
-        playlist.add(pi)
+         val playlist = ArrayList<PlaylistItem>()
+         playlist.add(pi)
 
-        val playerConfig = PlayerConfig.Builder()
-            .playlist(playlist)
-            .build()
+         val playerConfig = PlayerConfig.Builder()
+             .playlist(playlist)
+             .build()
 
-        mPlayer!!.setup(playerConfig)
-        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
-        val params = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        controls.layoutParams = params
-        mPlayerView!!.addView(controls)
-        controls.bind(mPlayer!!, this)
-    }
+         mPlayer!!.setup(playerConfig)
+         val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
+         val params = FrameLayout.LayoutParams(
+             ViewGroup.LayoutParams.MATCH_PARENT,
+             ViewGroup.LayoutParams.MATCH_PARENT
+         )
+         controls.layoutParams = params
+         mPlayerView!!.addView(controls)
+         controls.bind(mPlayer!!, this)
+     }
 
-    private fun setupPlayer2() {
-        // Handle hiding/showing of ActionBar
-        mPlayer!!.addListener(EventType.FULLSCREEN, this@MainActivity)
+     private fun setupPlayer2() {
+         // Handle hiding/showing of ActionBar
+         mPlayer!!.addListener(EventType.FULLSCREEN, this@Video2Activity)
 
-        // Keep the screen on during playback
-        KeepScreenOnHandler(mPlayer!!, window)
+         // Keep the screen on during playback
+         KeepScreenOnHandler(mPlayer!!, window)
 
-        // Load a media source
-        val config = PlayerConfig.Builder()
-            .playlistUrl("https://cdn.jwplayer.com/v2/playlists/3jBCQ2MI?format=json")
-            .uiConfig(
-                UiConfig.Builder()
-                    .displayAllControls()
-                    .hide(UiGroup.NEXT_UP)
-                    .build()
-            )
-            .displayTitle(true)
-//            .file()
-//            .stretching(PlayerConfig.STRETCHING_FILL)
-            .build()
-        mPlayer!!.setup(config)
-        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
-        val params = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        controls.layoutParams = params
-        mPlayerView!!.addView(controls)
-        controls.bind(mPlayer!!, this)
-    }*/
+         // Load a media source
+         val config = PlayerConfig.Builder()
+             .playlistUrl("https://cdn.jwplayer.com/v2/playlists/3jBCQ2MI?format=json")
+             .uiConfig(
+                 UiConfig.Builder()
+                     .displayAllControls()
+                     .hide(UiGroup.NEXT_UP)
+                     .build()
+             )
+             .displayTitle(true)
+ //            .file()
+ //            .stretching(PlayerConfig.STRETCHING_FILL)
+             .build()
+         mPlayer!!.setup(config)
+         val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
+         val params = FrameLayout.LayoutParams(
+             ViewGroup.LayoutParams.MATCH_PARENT,
+             ViewGroup.LayoutParams.MATCH_PARENT
+         )
+         controls.layoutParams = params
+         mPlayerView!!.addView(controls)
+         controls.bind(mPlayer!!, this)
+     }*/
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
@@ -377,7 +377,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
                 if (null != mSelectedMedia) {
 //                    if (mPlaybackState == PlaybackState.PLAYING) {
 //                        mVideoView.pause()
-                        loadRemoteMedia(0, true) //mSeekbar.getProgress()
+                    loadRemoteMedia(0, true) //mSeekbar.getProgress()
 //                        return
 //                    } else {
 //                        mPlaybackState = PlaybackState.IDLE
@@ -385,7 +385,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //                    }
                 }
 //                updatePlayButton(mPlaybackState)
-                    invalidateOptionsMenu()
+                invalidateOptionsMenu()
 
             }
 
@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
         remoteMediaClient.registerCallback(object : RemoteMediaClient.Callback() {
             override fun onStatusUpdated() {
-                val intent = Intent(this@MainActivity, ExpandedControlsActivity::class.java)
+                val intent = Intent(this@Video2Activity, ExpandedControlsActivity::class.java)
                 startActivity(intent)
                 remoteMediaClient.unregisterCallback(this)
             }

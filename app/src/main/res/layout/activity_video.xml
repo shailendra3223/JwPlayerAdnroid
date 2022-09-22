@@ -1,27 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cl_parent_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black"
-    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+    xmlns:tools="http://schemas.android.com/tools">
 
-<!--        <View-->
-<!--            android:id="@id/cl_parent_view"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".VideoActivity"
+        android:background="@color/black">
+
+        <com.jwplayer.pub.view.JWPlayerView
+            android:id="@+id/jwplayer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/jw_transparent"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/expanded_controller"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
 
         <ImageView
             android:id="@+id/tv_fast_backward_15"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_replay"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/play_pause_toggle"
             app:layout_constraintHorizontal_bias="0.45"
@@ -45,7 +66,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_forward"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintHorizontal_bias="0.55"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +88,7 @@
             app:drawableTint="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
+            android:visibility="visible"
             tools:visibility="visible"/>
 
         <ImageView
@@ -83,23 +104,23 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_title"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="gone"/>
 
-<!--        <ImageView-->
-<!--            android:id="@+id/iv_chrome_cast"-->
-<!--            android:layout_width="50dp"-->
-<!--            android:layout_height="50dp"-->
-<!--            android:layout_marginVertical="10dp"-->
-<!--            android:contentDescription="@string/jwplayer_chromecast"-->
-<!--            android:src="@drawable/ic_jw_cast_off"-->
-<!--            android:visibility="gone"-->
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_chrome_cast"-->
+        <!--            android:layout_width="50dp"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_marginVertical="10dp"-->
+        <!--            android:contentDescription="@string/jwplayer_chromecast"-->
+        <!--            android:src="@drawable/ic_jw_cast_off"-->
+        <!--            android:visibility="visible"-->
 
-<!--            app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"-->
-<!--            app:layout_constraintBottom_toBottomOf="@+id/tv_title"-->
-<!--            app:layout_constraintEnd_toEndOf="@+id/tv_time"-->
-<!--            app:layout_constraintRight_toRightOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/tv_title"-->
-<!--            tools:visibility="visible" />        -->
+        <!--            app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@+id/tv_title"-->
+        <!--            app:layout_constraintEnd_toEndOf="@+id/tv_time"-->
+        <!--            app:layout_constraintRight_toRightOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="@+id/tv_title"-->
+        <!--            tools:visibility="visible" />        -->
 
         <ImageView
             android:id="@+id/iv_chrome_cast"
@@ -113,32 +134,32 @@
             app:layout_constraintEnd_toEndOf="@+id/tv_time"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_title"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
-        <androidx.mediarouter.app.MediaRouteButton
-            android:id="@+id/media_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:mediaRouteTypes="user"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/iv_chrome_cast"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_chrome_cast"
-            tools:visibility="visible" />
-
-<!--        <ImageView-->
-<!--            android:id="@+id/iv_exit_fullscreen"-->
-<!--            android:layout_width="50dp"-->
-<!--            android:layout_height="50dp"-->
-<!--            android:layout_marginEnd="10dp"-->
-<!--            android:layout_marginBottom="4dp"-->
-<!--            android:src="@drawable/ic_jw_exit_fullscreen"-->
-<!--            app:layout_constraintBottom_toTopOf="@+id/seekbar"-->
-<!--            app:layout_constraintEnd_toEndOf="@+id/seekbar"-->
+<!--        <androidx.mediarouter.app.MediaRouteButton-->
+<!--            android:id="@+id/media_route_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:mediaRouteTypes="user"-->
+<!--            android:visibility="visible"-->
+<!--            app:layout_constraintEnd_toEndOf="@+id/iv_chrome_cast"-->
 <!--            app:layout_constraintRight_toRightOf="parent"-->
-<!--            android:contentDescription="@string/jwplayer_exit_fullscreen"-->
-<!--            android:visibility="gone"-->
-<!--            tools:visibility="visible"/>-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/iv_chrome_cast"-->
+<!--            tools:visibility="visible" />-->
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_exit_fullscreen"-->
+        <!--            android:layout_width="50dp"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_marginEnd="10dp"-->
+        <!--            android:layout_marginBottom="4dp"-->
+        <!--            android:src="@drawable/ic_jw_exit_fullscreen"-->
+        <!--            app:layout_constraintBottom_toTopOf="@+id/seekbar"-->
+        <!--            app:layout_constraintEnd_toEndOf="@+id/seekbar"-->
+        <!--            app:layout_constraintRight_toRightOf="parent"-->
+        <!--            android:contentDescription="@string/jwplayer_exit_fullscreen"-->
+        <!--            android:visibility="visible"-->
+        <!--            tools:visibility="visible"/>-->
 
         <SeekBar
             android:id="@+id/seekbar"
@@ -150,7 +171,7 @@
             android:progressBackgroundTint="@color/white"
             android:progressTint="@color/red"
             android:thumbTint="@color/white"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/tv_video_setting"
             app:layout_constraintEnd_toStartOf="@+id/tv_time"
             app:layout_constraintStart_toStartOf="parent"
@@ -189,7 +210,7 @@
             app:layout_constraintEnd_toStartOf="@+id/tv_episode"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/tv_subtitle"
-            android:visibility="gone"
+            android:visibility="visible"
             tools:visibility="visible"/>
 
         <TextView
@@ -202,7 +223,7 @@
             android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:visibility="gone"
+            android:visibility="visible"
             app:drawableStartCompat="@drawable/ic_subtitles"
             app:drawableTint="@color/white"
             android:drawablePadding="8dp"
@@ -223,7 +244,7 @@
             android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:visibility="gone"
+            android:visibility="visible"
             app:drawableStartCompat="@drawable/ic_episode"
             app:drawableTint="@color/white"
             android:drawablePadding="8dp"
@@ -244,7 +265,7 @@
             android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:visibility="gone"
+            android:visibility="visible"
             app:drawableStartCompat="@drawable/ic_next_episode"
             app:drawableTint="@color/white"
             android:drawablePadding="4dp"
@@ -255,4 +276,7 @@
             app:layout_constraintTop_toBottomOf="@+id/seekbar"
             tools:visibility="visible" />
 
-</merge>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
