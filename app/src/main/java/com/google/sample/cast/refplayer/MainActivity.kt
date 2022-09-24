@@ -6,10 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -42,15 +39,17 @@ import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.view.JWPlayerView
 
 
-class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener {
+class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener,
+    CustomPlayerView.OnMainScreenVisibilityListener {
     var mPlayerView: JWPlayerView? = null
     private var mPlayer: JWPlayer? = null
+    private var toolbar: Toolbar? = null
 
     var mScaleFactor = 1.0f
     private val GOOGLE_PLAY_STORE_PACKAGE_NAME_OLD = "com.google.market"
     private val GOOGLE_PLAY_STORE_PACKAGE_NAME_NEW = "com.android.vending"
     private val TAG = "MainActivity::Class"
-
+    private var controls:MyControlPan? = null
 
     private var mSessionManagerListener: SessionManagerListener<CastSession>? = null
     private var mCastContext: CastContext? = null
@@ -60,9 +59,11 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     var remoteMediaClient: RemoteMediaClient? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main)
+
 //
-//        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 //        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
         val metrics = resources.displayMetrics
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         WebView.setWebContentsDebuggingEnabled(true)
         // TODO: Add your license key
         LicenseUtil().setLicenseKey(this, "OwyAxwyK8E//wkcI5SlH3MIBOqrcNP8P3YI3SKFF5zMdhshU")
+
         mPlayerView = findViewById(R.id.jwplayer)
         mPlayerView?.getPlayerAsync(this, this,
             JWPlayer.PlayerInitializationListener { jwPlayer: JWPlayer? ->
@@ -81,6 +83,17 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
                 setupPlayer1()
             })
 
+        val widthDp = resources.displayMetrics.run { widthPixels / density }
+        val heightDp = resources.displayMetrics.run { heightPixels / density }
+
+        val halfHeightDp = (heightDp/2).toInt()
+        var marginTop = halfHeightDp - 100
+
+        if (marginTop <= 0) {
+            marginTop = (heightDp/2).toInt()
+        }
+
+        Log.i(TAG, "onZoomUpdate5i: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
 
 //        if (isGoogleApiAvailable(this)) {
         mCastContext = CastContext.getSharedInstance(applicationContext)
@@ -90,7 +103,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //        window.decorView.apply {
 //            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
 //        }
-
+//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
@@ -184,15 +197,15 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 //            .stretching(PlayerConfig.STRETCHING_FILL)
             .build()
         mPlayer!!.setup(config)*/
-        val controls =
-            MyControlPan(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_ActionBar))
+
         val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        controls.layoutParams = params
-        mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data, mPlayerView!!, mCastContext!!)
+        controls = MyControlPan(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_ActionBar))
+        controls!!.layoutParams = params
+        mPlayerView!!.addView(controls!!)
+        controls!!.bindSettingPan(mPlayer!!, playerConfig!!, this, data, mPlayerView!!, mCastContext!!, this)
 
         mPlayer!!.setFullscreen(true, true)
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))
@@ -336,12 +349,24 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     }
 
     private fun setupActionBar() {
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val intent: Intent
+        when (item.itemId) {
+            R.id.aspect_ratio_menu -> {
+                val isFull = mPlayer!!.fullscreen
+                if (isFull) {
+                    item.setIcon(R.drawable.ic_aspect_ratio)
+                } else {
+                    item.setIcon(R.drawable.ic_full_screen)
+                }
+
+                controls!!.onZoomUpdatePan(isFull)
+                mPlayer!!.setFullscreen(!isFull, true)
+            }
+        }
         return true
     }
 
@@ -440,6 +465,18 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         mCastContext!!.sessionManager.removeSessionManagerListener(
             mSessionManagerListener!!, CastSession::class.java
         )
+    }
+
+    override fun onVisible(isVisible: Boolean) {
+        if (isVisible) toolbar!!.visibility = View.VISIBLE else toolbar!!.visibility = View.GONE
+    }
+
+    override fun onZoom(isVisible: Boolean) {
+//        TODO("Not yet implemented")
+    }
+
+    override fun onToolInfo(title: String) {
+        toolbar!!.title = title
     }
 }
 

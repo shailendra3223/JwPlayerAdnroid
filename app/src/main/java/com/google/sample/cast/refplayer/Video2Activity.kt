@@ -192,7 +192,7 @@ class Video2Activity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListen
         )
         controls.layoutParams = params
         mPlayerView!!.addView(controls)
-        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data, mPlayerView!!, mCastContext!!)
+        controls.bindSettingPan(mPlayer!!, playerConfig!!, this, data, mPlayerView!!, mCastContext!!, null)
 
         mPlayer!!.setFullscreen(true, true)
 //        val controls = MyControls(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Light))

@@ -11,6 +11,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.content.res.AppCompatResources
@@ -20,7 +21,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.mediarouter.media.MediaRouter
-import com.google.sample.cast.refplayer.R
+import com.google.android.gms.cast.*
+import com.google.android.gms.cast.framework.*
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import com.google.android.gms.common.images.WebImage
 import com.google.sample.cast.refplayer.adapter.CastSelectAdapter
 import com.google.sample.cast.refplayer.adapter.PlayListSeasonAdapter
 import com.google.sample.cast.refplayer.adapter.SelectAdapter
@@ -29,10 +33,6 @@ import com.google.sample.cast.refplayer.databinding.DialogCastBinding
 import com.google.sample.cast.refplayer.databinding.DialogPlayrateSubtitleBinding
 import com.google.sample.cast.refplayer.databinding.FragmentPlayListSeasonBinding
 import com.google.sample.cast.refplayer.model.SelectItem
-import com.google.android.gms.cast.*
-import com.google.android.gms.cast.framework.*
-import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import com.google.android.gms.common.images.WebImage
 import com.jwplayer.pub.api.JWPlayer
 import com.jwplayer.pub.api.UiGroup
 import com.jwplayer.pub.api.configuration.PlayerConfig
@@ -54,7 +54,8 @@ class CustomPlayerView(
     defStyleRes: Int
 ) : ConstraintLayout(
     mContext!!, attrs, defStyleAttr, defStyleRes
-), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession>, CastStateListener, AppVisibilityListener /*ControlButtonsContainer*/ {
+), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession>, CastStateListener,
+    AppVisibilityListener /*ControlButtonsContainer*/ {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
@@ -63,6 +64,7 @@ class CustomPlayerView(
     private var tvTime: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
+
     private var TAG = "CustomPlayerView:Class"
 
     //    private var fullscreenToggle: ImageView? = null
@@ -71,6 +73,10 @@ class CustomPlayerView(
     private var mediaRouteButton: MediaRouteButton? = null
     private var ivFastForward15: ImageView? = null
     private var ivFastBackward15: ImageView? = null
+    private var mListener: OnMainScreenVisibilityListener? = null
+
+    var halfHeightDp = 0
+    var marginTop = 0
 
     @JvmOverloads
     constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
@@ -79,6 +85,10 @@ class CustomPlayerView(
         defStyleAttr,
         0
     ) {
+    }
+
+    public fun initListener(nListener: OnMainScreenVisibilityListener?) {
+        mListener = nListener
     }
 
     private fun initView(context: Context?) {
@@ -116,6 +126,39 @@ class CustomPlayerView(
         castContext: CastContext
     ) {
 
+
+        val widthDp = resources.displayMetrics.run { widthPixels / density }
+        val heightDp = resources.displayMetrics.run { heightPixels / density }
+
+        getScreenResolutionRealMetric(context)
+        getScreenResolutionMetric(context)
+
+        Log.i(TAG, "onZoomUpdate4: ${getScreenResolutionRealMetric(context)}  ${getScreenResolutionMetric(context)} ")
+        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ")
+
+        halfHeightDp = (heightDp/2).toInt() - 40
+
+        if (halfHeightDp <= 0) {
+            halfHeightDp = (heightDp/2).toInt()
+        }
+
+        marginTop = halfHeightDp - 60
+
+        if (marginTop <= 0) {
+            marginTop = (heightDp/2).toInt()
+        }
+
+        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
+
+        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
+        }
+
+        contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
+        }
+
+
         mCastContext = castContext;
         CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
         mCastContext!!.addCastStateListener(this)
@@ -123,7 +166,8 @@ class CustomPlayerView(
         mCastSession = mCastContext!!.sessionManager.currentCastSession
         mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
 
-        cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
+        cast =
+            customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
 
         val mEpisode = data[0].seasons[positionSeason].episodes[positionEpisode]
 //        val jsonObj: JSONObject = VideoProvider().parseUrl(mEpisode.media)
@@ -132,6 +176,8 @@ class CustomPlayerView(
 
         customPlayerView.isFirstFrame.observe(lifecycleOwner) { mJWPlayer: JWPlayer ->
             mTitle!!.text = mJWPlayer.playlistItem.mTitle
+            mListener!!.onToolInfo(mJWPlayer.playlistItem.mTitle)
+
         }
 
         customPlayerView.printTime.observe(lifecycleOwner) {
@@ -253,7 +299,10 @@ class CustomPlayerView(
                 mCastContext!!.addCastStateListener(this)
                 mCastContext!!.addAppVisibilityListener(this)
                 mCastSession = mCastContext!!.sessionManager.currentCastSession
-                mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
+                mCastContext!!.sessionManager.addSessionManagerListener(
+                    this,
+                    CastSession::class.java
+                )
                 AlertDialogCast(cast!!, isCastRoutes)
             }
         }
@@ -356,9 +405,29 @@ class CustomPlayerView(
 //        fullscreenToggle!!.setOnClickListener(OnClickListener { v: View? -> customPlayerView.toggleFullscreen() })
     }
 
+    fun onZoomUpdate(isFull: Boolean) {
+
+        val widthDp = resources.displayMetrics.run { widthPixels / density }
+        val heightDp = resources.displayMetrics.run { heightPixels / density }
+
+        Log.i(TAG, "onZoomUpdate55: ${widthDp}  ${heightDp} ")
+
+        sec3Timer(null)
+
+
+
+        Log.i(TAG, "onZoomUpdate4: ${getScreenResolutionRealMetric(context)}  ${getScreenResolutionMetric(context)} ")
+
+        if (isFull) {
+//            mVideoSetting!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//                setMargins(dpFormat(12), dpFormat(12), dpFormat(12), dpFormat(12))
+//            }
+        }
+    }
+
     var countDown: CountDownTimer? = null
     var VisibilityTime = 2000
-    private fun sec3Timer(customPlayerView: CustomPlayerViewModel) {
+    private fun sec3Timer(customPlayerView: CustomPlayerViewModel?) {
         visibilityComponents(VISIBLE)
         countDown?.cancel()
         countDown = object : CountDownTimer(VisibilityTime.toLong(), 1000) {
@@ -368,22 +437,23 @@ class CustomPlayerView(
 
             override fun onFinish() {
                 visibilityComponents(GONE)
-                customPlayerView.disableTouch.value = false
+//                customPlayerView.disableTouch.value = false
             }
         }.start()
     }
 
     private fun visibilityComponents(isVisible: Int) {
+        mListener!!.onVisible(isVisible == VISIBLE)
         mVideoSetting!!.visibility = isVisible
         mEpisodes!!.visibility = isVisible
         mSubtitleAudio!!.visibility = isVisible
-        mTitle!!.visibility = isVisible
+        mTitle!!.visibility = GONE
         contentSeekBar!!.visibility = isVisible
         tvTime!!.visibility = isVisible
         playToggle!!.visibility = isVisible
 //        fullscreenToggle!!.visibility = isVisible
-        ZoomInOut!!.visibility = isVisible
-        ivChromeCast!!.visibility = isVisible
+        ZoomInOut!!.visibility = GONE
+        ivChromeCast!!.visibility = GONE
         mNextEpisode!!.visibility = isVisible
 //        ivFastForward15!!.visibility = isVisible
 //        ivFastBackward15!!.visibility = isVisible
@@ -846,6 +916,28 @@ class CustomPlayerView(
 //    override fun getUIMediaController(): UIMediaController? {
 ////        TODO("Not yet implemented")
 //    }
+
+    private fun getScreenResolutionRealMetric(context: Context): String? {
+        val metrics = DisplayMetrics()
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(
+            metrics
+        )
+        return "{" + metrics.widthPixels + "," + metrics.heightPixels + "}"
+    }
+
+    private fun getScreenResolutionMetric(context: Context): String? {
+        val metrics = DisplayMetrics()
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getMetrics(
+            metrics
+        )
+        return "{" + metrics.widthPixels + "," + metrics.heightPixels + "}"
+    }
+
+    public interface OnMainScreenVisibilityListener {
+        fun onVisible(isVisible: Boolean)
+        fun onZoom(isVisible: Boolean)
+        fun onToolInfo(title: String)
+    }
 
 
 }

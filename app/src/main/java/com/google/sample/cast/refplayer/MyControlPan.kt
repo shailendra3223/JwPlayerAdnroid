@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
+import com.github.mikephil.charting.components.XAxis
 import com.google.android.gms.cast.framework.CastContext
 import com.google.sample.cast.refplayer.R
 import com.jwplayer.pub.api.JWPlayer
@@ -33,13 +34,17 @@ class MyControlPan(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         controlView = findViewById(R.id.custome_setting_pan)
     }
 
-    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass, jwplayerView: JWPlayerView, mCastContext: CastContext) {
+    fun bindSettingPan(player: JWPlayer, playerConfig: PlayerConfig, lifecycleOwner: LifecycleOwner, data : ModelClass, jwplayerView: JWPlayerView, mCastContext: CastContext, mListener: CustomPlayerView.OnMainScreenVisibilityListener?) {
         // Bind Views
         val settingVM = player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         val playlistViewModel = player.getViewModelForUiGroup(UiGroup.PLAYLIST) as PlaylistViewModel
         val customPlayerView = CustomPlayerViewModel(player)
-
+        controlView!!.initListener(mListener)
         controlView!!.bindSettingPan(customPlayerView, playlistViewModel, playerConfig, lifecycleOwner, data, jwplayerView, mCastContext)
+    }
+
+    fun onZoomUpdatePan(isFull: Boolean) {
+        controlView!!.onZoomUpdate(isFull)
     }
 
     init {
