@@ -125,27 +125,19 @@ class CustomPlayerView(
         jwplayerView: JWPlayerView,
         castContext: CastContext
     ) {
-
-
         val widthDp = resources.displayMetrics.run { widthPixels / density }
         val heightDp = resources.displayMetrics.run { heightPixels / density }
 
-        getScreenResolutionRealMetric(context)
-        getScreenResolutionMetric(context)
-
-        Log.i(TAG, "onZoomUpdate4: ${getScreenResolutionRealMetric(context)}  ${getScreenResolutionMetric(context)} ")
-        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ")
-
-        halfHeightDp = (heightDp/2).toInt() - 40
+        halfHeightDp = (heightDp / 2).toInt() - 40
 
         if (halfHeightDp <= 0) {
-            halfHeightDp = (heightDp/2).toInt()
+            halfHeightDp = (heightDp / 2).toInt()
         }
 
         marginTop = halfHeightDp - 60
 
         if (marginTop <= 0) {
-            marginTop = (heightDp/2).toInt()
+            marginTop = (heightDp / 2).toInt()
         }
 
         Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
@@ -190,8 +182,6 @@ class CustomPlayerView(
 
         mVideoSetting!!.setOnClickListener { v: View? ->
             sec3Timer(customPlayerView)
-//            customPlayerView.isVisibility.value = false
-//            customPlayerView.disableTouch.value = true
 //            customPlayerView.player.pause()
             visibilityComponents(GONE)
             AlertDialogPlayer(customPlayerView, 1001)
@@ -199,8 +189,6 @@ class CustomPlayerView(
 
         mSubtitleAudio!!.setOnClickListener { v: View? ->
             sec3Timer(customPlayerView)
-//            customPlayerView.isVisibility.value = false
-//            customPlayerView.disableTouch.value = true
 //            customPlayerView.player.pause()
             visibilityComponents(GONE)
             AlertDialogPlayer(customPlayerView, 1003)
@@ -236,8 +224,6 @@ class CustomPlayerView(
         mEpisodes!!.setOnClickListener {
             sec3Timer(customPlayerView)
             visibilityComponents(GONE)
-//            customPlayerView.isVisibility.value = false
-//            customPlayerView.disableTouch.value = true
             AlertDialogPlayList(customPlayerView, data[positionSeason].seasons, playerConfig)
         }
 
@@ -249,8 +235,6 @@ class CustomPlayerView(
 
             //CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item)
             sec3Timer(customPlayerView)
-            customPlayerView.isVisibility.value = false
-            customPlayerView.disableTouch.value = true
 
             val router: MediaRouter = MediaRouter.getInstance(context)
             val mRoutes: List<MediaRouter.RouteInfo> = router.routes
@@ -268,7 +252,10 @@ class CustomPlayerView(
             if (mCastSession != null) {
                 if (mCastSession!!.isConnected) {
                     Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
-                    Log.i(TAG, "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}")
+                    Log.i(
+                        TAG,
+                        "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
+                    )
                     AalertDialogDisconnectCast(cast!!, mCastSession!!)
                 } else {
                     remoteMediaClient = mCastSession!!.remoteMediaClient
@@ -364,8 +351,14 @@ class CustomPlayerView(
         }
 
         customPlayerView.isSeekbarVisible.observe(lifecycleOwner) { isVisible ->
-            contentSeekBar!!.visibility = if (isVisible) VISIBLE else GONE
-            tvTime!!.visibility = if (isVisible) VISIBLE else GONE
+//            contentSeekBar!!.visibility = if (isVisible) VISIBLE else GONE
+//            tvTime!!.visibility = if (isVisible) VISIBLE else GONE
+
+            if (isVisible){
+                visibilityComponents(VISIBLE)
+            } else {
+                visibilityComponents(GONE)
+            }
         }
         contentSeekBar!!.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -406,18 +399,7 @@ class CustomPlayerView(
     }
 
     fun onZoomUpdate(isFull: Boolean) {
-
-        val widthDp = resources.displayMetrics.run { widthPixels / density }
-        val heightDp = resources.displayMetrics.run { heightPixels / density }
-
-        Log.i(TAG, "onZoomUpdate55: ${widthDp}  ${heightDp} ")
-
         sec3Timer(null)
-
-
-
-        Log.i(TAG, "onZoomUpdate4: ${getScreenResolutionRealMetric(context)}  ${getScreenResolutionMetric(context)} ")
-
         if (isFull) {
 //            mVideoSetting!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
 //                setMargins(dpFormat(12), dpFormat(12), dpFormat(12), dpFormat(12))
@@ -437,7 +419,6 @@ class CustomPlayerView(
 
             override fun onFinish() {
                 visibilityComponents(GONE)
-//                customPlayerView.disableTouch.value = false
             }
         }.start()
     }
