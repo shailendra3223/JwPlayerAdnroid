@@ -23,7 +23,7 @@ class CastOptionsProvider : OptionsProvider {
                     MediaIntentReceiver.ACTION_STOP_CASTING
                 ), intArrayOf(1, 2)
             )
-            .setTargetActivityClassName(MainActivity::class.java.name)
+            .setTargetActivityClassName(ExpandedControlsActivity::class.java.name)
             .build()
         val mediaOptions = CastMediaOptions.Builder()
             .setImagePicker(ImagePickerImpl())

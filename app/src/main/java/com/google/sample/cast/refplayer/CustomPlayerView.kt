@@ -142,9 +142,9 @@ class CustomPlayerView(
 
         Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
 
-        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
-        }
+//        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
+//        }
 
         contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
@@ -400,10 +400,25 @@ class CustomPlayerView(
 
     fun onZoomUpdate(isFull: Boolean) {
         sec3Timer(null)
-        if (isFull) {
-//            mVideoSetting!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//                setMargins(dpFormat(12), dpFormat(12), dpFormat(12), dpFormat(12))
-//            }
+
+        val widthDp = resources.displayMetrics.run { widthPixels / density }
+        val heightDp = resources.displayMetrics.run { heightPixels / density }
+
+        halfHeightDp = (heightDp / 2).toInt()
+
+        marginTop = if (isFull) {
+            halfHeightDp - 120
+        } else {
+            halfHeightDp - 100
+        }
+
+        if (marginTop <= 0) {
+            marginTop = (heightDp / 2).toInt()
+        }
+
+        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
+        contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
         }
     }
 
