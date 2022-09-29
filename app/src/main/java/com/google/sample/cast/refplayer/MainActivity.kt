@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.MediaMetadata
+ import com.google.android.gms.cast.MediaQueueItem
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
@@ -37,6 +38,7 @@ import com.jwplayer.pub.api.media.captions.Caption
 import com.jwplayer.pub.api.media.captions.CaptionType
 import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.view.JWPlayerView
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener,
@@ -57,6 +59,9 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 
     var mSelectedMedia: MediaInfo? = null
     var remoteMediaClient: RemoteMediaClient? = null
+
+    private val mQueue: List<MediaQueueItem> = CopyOnWriteArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -225,6 +230,7 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
 //      movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
 
+        Log.i(TAG, "loadVideos: ${mPlayer!!.duration} - ${mEpisode.media} - ${mEpisode.title}")
         mSelectedMedia = MediaInfo.Builder(mEpisode.media)
             .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
             .setContentType("videos/mp4")
@@ -429,15 +435,15 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
         if (mCastSession == null) {
             return
         }
-        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
-        remoteMediaClient.registerCallback(object : RemoteMediaClient.Callback() {
+        remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
             override fun onStatusUpdated() {
                 val intent = Intent(this@MainActivity, ExpandedControlsActivity::class.java)
                 startActivity(intent)
-                remoteMediaClient.unregisterCallback(this)
+                remoteMediaClient!!.unregisterCallback(this)
             }
         })
-        remoteMediaClient.load(
+        remoteMediaClient!!.load(
             MediaLoadRequestData.Builder()
                 .setMediaInfo(mSelectedMedia)
                 .setAutoplay(autoPlay)
@@ -477,6 +483,15 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 
     override fun onToolInfo(title: String) {
         toolbar!!.title = title
+    }
+
+    @JvmName("getRemoteMediaClient1")
+    fun getRemoteMediaClient(): RemoteMediaClient? {
+        val castSession = CastContext.getSharedInstance(this).sessionManager
+            .currentCastSession
+        return if (castSession != null && castSession.isConnected) {
+            castSession.remoteMediaClient
+        } else null
     }
 }
 

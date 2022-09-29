@@ -1,4 +1,4 @@
-package com.example.jwplayer
+package com.google.sample.cast.refplayer
 
 import org.junit.Test
 

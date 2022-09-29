@@ -11,7 +11,6 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.content.res.AppCompatResources
@@ -19,17 +18,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
-import androidx.mediarouter.app.MediaRouteButton
-import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.*
 import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
-import com.google.sample.cast.refplayer.adapter.CastSelectAdapter
 import com.google.sample.cast.refplayer.adapter.PlayListSeasonAdapter
 import com.google.sample.cast.refplayer.adapter.SelectAdapter
 import com.google.sample.cast.refplayer.cast.ExpandedControlsActivity
-import com.google.sample.cast.refplayer.databinding.DialogCastBinding
 import com.google.sample.cast.refplayer.databinding.DialogPlayrateSubtitleBinding
 import com.google.sample.cast.refplayer.databinding.FragmentPlayListSeasonBinding
 import com.google.sample.cast.refplayer.model.SelectItem
@@ -44,6 +39,7 @@ import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
 import com.jwplayer.pub.view.JWPlayerView
+import org.json.JSONObject
 import kotlin.math.roundToInt
 
 
@@ -54,8 +50,7 @@ class CustomPlayerView(
     defStyleRes: Int
 ) : ConstraintLayout(
     mContext!!, attrs, defStyleAttr, defStyleRes
-), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession>, CastStateListener,
-    AppVisibilityListener /*ControlButtonsContainer*/ {
+), SelectAdapter.SelectItemInterface, SessionManagerListener<CastSession>, CastStateListener {
     private var mVideoSetting: TextView? = null
     private var mEpisodes: TextView? = null
     private var mSubtitleAudio: TextView? = null
@@ -64,13 +59,10 @@ class CustomPlayerView(
     private var tvTime: TextView? = null
     private var contentSeekBar: SeekBar? = null
     private var playToggle: ImageView? = null
+    private val nContext = mContext
 
     private var TAG = "CustomPlayerView:Class"
 
-    //    private var fullscreenToggle: ImageView? = null
-    private var ZoomInOut: ImageView? = null
-    private var ivChromeCast: ImageView? = null
-    private var mediaRouteButton: MediaRouteButton? = null
     private var ivFastForward15: ImageView? = null
     private var ivFastBackward15: ImageView? = null
     private var mListener: OnMainScreenVisibilityListener? = null
@@ -87,7 +79,7 @@ class CustomPlayerView(
     ) {
     }
 
-    public fun initListener(nListener: OnMainScreenVisibilityListener?) {
+    fun initListener(nListener: OnMainScreenVisibilityListener?) {
         mListener = nListener
     }
 
@@ -99,11 +91,7 @@ class CustomPlayerView(
         mNextEpisode = findViewById(R.id.tv_next_episode)
         contentSeekBar = findViewById(R.id.seekbar)
         playToggle = findViewById(R.id.play_pause_toggle)
-//      fullscreenToggle = findViewById(R.id.iv_exit_fullscreen)
         mTitle = findViewById(R.id.tv_title)
-        ZoomInOut = findViewById(R.id.iv_zoom_in_out)
-        ivChromeCast = findViewById(R.id.iv_chrome_cast)
-        mediaRouteButton = findViewById(R.id.media_route_button)
         ivFastForward15 = findViewById(R.id.tv_fast_forward_15)
         ivFastBackward15 = findViewById(R.id.tv_fast_backward_15)
         tvTime = findViewById(R.id.tv_time)
@@ -128,38 +116,35 @@ class CustomPlayerView(
         val widthDp = resources.displayMetrics.run { widthPixels / density }
         val heightDp = resources.displayMetrics.run { heightPixels / density }
 
-        halfHeightDp = (heightDp / 2).toInt() - 40
-
-        if (halfHeightDp <= 0) {
-            halfHeightDp = (heightDp / 2).toInt()
-        }
-
-        marginTop = halfHeightDp - 60
+        halfHeightDp = (heightDp / 2).toInt()
+        marginTop = (halfHeightDp/2)
 
         if (marginTop <= 0) {
-            marginTop = (heightDp / 2).toInt()
+            marginTop = (halfHeightDp / 2).toInt()
         }
 
-        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
+        Log.i(TAG, "onZoomUpdate5x: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
 
 //        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
 //            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
 //        }
+
+        mCastContext = castContext
+        mCastContext!!.addCastStateListener(this)
+        mCastSession = mCastContext!!.sessionManager.currentCastSession
+        mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
+        cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
 
         contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
         }
 
 
-        mCastContext = castContext;
-        CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
-        mCastContext!!.addCastStateListener(this)
-        mCastContext!!.addAppVisibilityListener(this)
-        mCastSession = mCastContext!!.sessionManager.currentCastSession
-        mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
-
-        cast =
-            customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
+        if (mCastSession!=null && mCastSession!!.isConnected) {
+            customPlayerView.player.pause()
+            val intent = Intent(context, ExpandedControlsActivity::class.java)
+            context.startActivity(intent)
+        }
 
         val mEpisode = data[0].seasons[positionSeason].episodes[positionEpisode]
 //        val jsonObj: JSONObject = VideoProvider().parseUrl(mEpisode.media)
@@ -194,104 +179,10 @@ class CustomPlayerView(
             AlertDialogPlayer(customPlayerView, 1003)
         }
 
-
-        ZoomInOut!!.setOnClickListener {
-            sec3Timer(customPlayerView)
-            val widthDp = context.resources.displayMetrics.run { widthPixels / density }
-            val heightDp = context.resources.displayMetrics.run { heightPixels / density }
-
-            if (customPlayerView.player.fullscreen) {
-                ZoomInOut!!.setImageDrawable(
-                    AppCompatResources.getDrawable(
-                        context,
-                        R.drawable.ic_aspect_ratio
-                    )
-                )
-                mVideoSetting!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    setMargins(dpFormat(12), dpFormat(12), dpFormat(12), dpFormat(12))
-                }
-            } else {
-                ZoomInOut!!.setImageDrawable(
-                    AppCompatResources.getDrawable(
-                        context,
-                        R.drawable.ic_full_screen
-                    )
-                )
-            }
-            customPlayerView.toggleFullscreen()
-        }
-
         mEpisodes!!.setOnClickListener {
             sec3Timer(customPlayerView)
             visibilityComponents(GONE)
             AlertDialogPlayList(customPlayerView, data[positionSeason].seasons, playerConfig)
-        }
-
-        mediaRouteButton!!.setOnClickListener {
-            CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton!!)
-        }
-
-        ivChromeCast!!.setOnClickListener {
-
-            //CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item)
-            sec3Timer(customPlayerView)
-
-            val router: MediaRouter = MediaRouter.getInstance(context)
-            val mRoutes: List<MediaRouter.RouteInfo> = router.routes
-            val isCastRoutes = ArrayList<MediaRouter.RouteInfo>()
-            val devices = ArrayList<CastDevice>()
-
-            for (routeInfo in mRoutes) {
-                val device = CastDevice.getFromBundle(routeInfo.extras)
-                if (device != null) {
-                    devices.add(device)
-                    isCastRoutes.add(routeInfo)
-                }
-            }
-
-            if (mCastSession != null) {
-                if (mCastSession!!.isConnected) {
-                    Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
-                    Log.i(
-                        TAG,
-                        "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
-                    )
-                    AalertDialogDisconnectCast(cast!!, mCastSession!!)
-                } else {
-                    remoteMediaClient = mCastSession!!.remoteMediaClient
-
-                    val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-
-                    movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
-//                  movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
-                    movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
-//                  movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
-
-                    mSelectedMedia = MediaInfo.Builder(mEpisode.media)
-                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                        .setContentType("videos/mp4")
-                        .setMetadata(movieMetadata)
-                        .setStreamDuration((customPlayerView.player.duration * 1000).toLong())
-                        .build()
-
-//                    remoteMediaClient!!.load(MediaLoadRequestData.Builder().setMediaInfo(mSelectedMedia).build())
-
-                    loadRemoteMedia(0, true)
-                    AlertDialogCast(cast!!, isCastRoutes)
-                }
-
-            } else {
-                mCastContext = CastContext.getSharedInstance(context)
-                CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
-                mCastContext!!.addCastStateListener(this)
-                mCastContext!!.addAppVisibilityListener(this)
-                mCastSession = mCastContext!!.sessionManager.currentCastSession
-                mCastContext!!.sessionManager.addSessionManagerListener(
-                    this,
-                    CastSession::class.java
-                )
-                AlertDialogCast(cast!!, isCastRoutes)
-            }
         }
 
         mNextEpisode!!.setOnClickListener {
@@ -383,19 +274,15 @@ class CustomPlayerView(
         }
         playToggle!!.setOnClickListener { v: View? ->
             sec3Timer(customPlayerView)
-            customPlayerView.togglePlay()
-        }
 
-//        customPlayerView.isFullscreen.observe(lifecycleOwner) { isFullscreen ->
-//            fullscreenToggle!!.setImageDrawable(
-//                if (isFullscreen) AppCompatResources.getDrawable(
-//                    context,
-//                    R.drawable.ic_jw_exit_fullscreen
-//                )
-//                else AppCompatResources.getDrawable(context, R.drawable.ic_jw_enter_fullscreen)
-//            )
-//        }
-//        fullscreenToggle!!.setOnClickListener(OnClickListener { v: View? -> customPlayerView.toggleFullscreen() })
+            if (mCastSession!=null && mCastSession!!.isConnected) {
+                Log.w(TAG, "Connected to a cast device")
+                val intent = Intent(context, ExpandedControlsActivity::class.java)
+                context.startActivity(intent)
+            } else {
+                customPlayerView.togglePlay()
+            }
+        }
     }
 
     fun onZoomUpdate(isFull: Boolean) {
@@ -407,13 +294,14 @@ class CustomPlayerView(
         halfHeightDp = (heightDp / 2).toInt()
 
         marginTop = if (isFull) {
-            halfHeightDp - 120
+            (halfHeightDp / 2) - 20
         } else {
-            halfHeightDp - 100
+            (halfHeightDp / 2)
         }
 
+
         if (marginTop <= 0) {
-            marginTop = (heightDp / 2).toInt()
+            marginTop = (halfHeightDp / 2).toInt()
         }
 
         Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
@@ -447,9 +335,6 @@ class CustomPlayerView(
         contentSeekBar!!.visibility = isVisible
         tvTime!!.visibility = isVisible
         playToggle!!.visibility = isVisible
-//        fullscreenToggle!!.visibility = isVisible
-        ZoomInOut!!.visibility = GONE
-        ivChromeCast!!.visibility = GONE
         mNextEpisode!!.visibility = isVisible
 //        ivFastForward15!!.visibility = isVisible
 //        ivFastBackward15!!.visibility = isVisible
@@ -589,7 +474,393 @@ class CustomPlayerView(
         }
     }
 
-    private fun AlertDialogCast(
+    var positionSeason = 0
+    var positionEpisode = 0
+    private fun AlertDialogPlayList(
+        customPlayerView: CustomPlayerViewModel,
+        season: List<Season>,
+        playerConfig: PlayerConfig
+    ) {
+        val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) // where "this" is the context
+
+        val binding: FragmentPlayListSeasonBinding =
+            DataBindingUtil.inflate(
+                dialog.layoutInflater,
+                R.layout.fragment_play_list_season,
+                null,
+                false
+            )
+
+        val listSeason = ArrayList<String>()
+        for (i in season.indices) {
+            listSeason.add("Season ${i + 1}")
+        }
+
+        val adapterSpinner =
+            ArrayAdapter(context, R.layout.layout_textview, listSeason)
+        binding.spSeason.adapter = adapterSpinner
+
+        binding.spSeason.setSelection(positionSeason)
+        binding.spSeason.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val adapter = PlayListSeasonAdapter(
+                    context,
+                    season[position].episodes,
+                    object : PlayListSeasonAdapter.CastDevicesInterface {
+                        override fun onVideoClick(data: Episode, posVideo: Int) {
+                            positionEpisode = posVideo
+                            val playlist: MutableList<PlaylistItem> = ArrayList()
+                            for (episode in season[position].episodes) {
+                                val caption = Caption.Builder()
+                                    .file("file:///android_asset/press-play-captions.vtt")
+                                    .kind(CaptionType.CAPTIONS)
+                                    .label("en")
+                                    .isDefault(true)
+                                    .build()
+                                val captionList: MutableList<Caption> = ArrayList()
+                                captionList.add(caption)
+
+                                val pi = PlaylistItem.Builder()
+                                    .description(episode.description)
+                                    .file(episode.media)
+                                    .image(episode.original_thumbnail_file)
+                                    .tracks(captionList)
+                                    .title(episode.title)
+                                    .build()
+
+                                playlist.add(pi)
+                            }
+
+
+                            if (mCastSession!=null && mCastSession!!.isConnected) {
+                                customPlayerView.player.setup(
+                                    PlayerConfig.Builder()
+                                        .playlist(playlist)
+                                        .playlistIndex(posVideo)
+                                        .uiConfig(playerConfig.mUiConfig)
+                                        .autostart(false)
+                                        .build()
+                                )
+                                loadVideo(season[position].episodes[posVideo], customPlayerView.player)
+//                                loadRemoteMedia(0, true, season[position].episodes[posVideo], customPlayerView.player)
+                            } else {
+                                customPlayerView.player.setup(
+                                    PlayerConfig.Builder()
+                                        .playlist(playlist)
+                                        .playlistIndex(posVideo)
+                                        .uiConfig(playerConfig.mUiConfig)
+                                        .autostart(true)
+                                        .build()
+                                )
+                            }
+
+                            dialog.dismiss()
+                        }
+                    })
+
+                binding.adapterPlayList = adapter
+                positionSeason = position
+
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        dialog.window?.setBackgroundDrawableResource(R.color.transparent75)
+
+        binding.ivClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.setContentView(binding.root)
+        dialog.show()
+    }
+
+    fun dpFormat(dp: Int): Int {
+        val displayMetrics = context.resources.displayMetrics
+        return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
+    }
+
+    override fun onSessionEnded(session: CastSession, p1: Int) {
+        Log.i(TAG, "onSessionEnded")
+    }
+
+    override fun onSessionEnding(session: CastSession) {
+        Log.i(TAG, "onSessionEnding")
+    }
+
+    override fun onSessionResumeFailed(session: CastSession, p1: Int) {
+        Log.i(TAG, "onSessionResumeFailed")
+    }
+
+    override fun onSessionResumed(session: CastSession, p1: Boolean) {
+        Log.i(TAG, "onSessionResumed")
+//        onApplicationConnected(session)
+    }
+
+    override fun onSessionResuming(session: CastSession, p1: String) {
+        Log.i(TAG, "onSessionResuming")
+
+    }
+
+    override fun onSessionStartFailed(session: CastSession, p1: Int) {
+        Log.i(TAG, "onSessionStartFailed")
+    }
+
+    override fun onSessionStarted(session: CastSession, p1: String) {
+        mCastSession = session
+        Log.i(TAG, "onSessionStarted")
+//        onApplicationConnected(session)
+    }
+
+    override fun onSessionStarting(session: CastSession) {
+        Log.i(TAG, "onSessionStarting")
+    }
+
+    override fun onSessionSuspended(session: CastSession, p1: Int) {
+        Log.i(TAG, "onSessionSuspended")
+    }
+
+    private var mIntroductoryOverlay: IntroductoryOverlay? = null
+    private fun showIntroductoryOverlay() {
+        if (mIntroductoryOverlay != null) {
+            mIntroductoryOverlay!!.remove()
+            return
+        }
+//        Handler().post {
+//            mIntroductoryOverlay = IntroductoryOverlay.Builder(this, mediaRouteButton)
+//                .setTitleText("Casting..")
+//                .setOverlayColor(R.color.skyblue)
+//                .setSingleTime()
+//                .setOnOverlayDismissedListener(
+//                    OnOverlayDismissedListener { mIntroductoryOverlay = null })
+//                .build()
+//            mIntroductoryOverlay!!.show()
+//        }
+    }
+
+//    public class MyMediaIntentReceiver : MediaIntentReceiver() {
+//        override fun onReceiveOtherAction(action: String, intent: Intent) {
+//
+//        }
+//    }
+
+
+    private fun loadRemoteMedia(position: Int, autoPlay: Boolean, mEpisode: Episode, mPlayer : JWPlayer) {
+        if (mCastSession == null) {
+            Toast.makeText(context, "RETURN", Toast.LENGTH_LONG).show()
+            return
+        }
+        remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
+            override fun onStatusUpdated() {
+                Toast.makeText(context, "STARTA", Toast.LENGTH_LONG).show()
+//                val intent = Intent(context, ExpandedControlsActivity::class.java)
+//                context.startActivity(intent)
+                loadVideo(mEpisode, mPlayer)
+                remoteMediaClient!!.unregisterCallback(this)
+            }
+        })
+//        remoteMediaClient!!.load(
+//            MediaLoadRequestData.Builder()
+//                .setMediaInfo(mSelectedMedia)
+//                .setAutoplay(autoPlay)
+//                .setCurrentTime(position.toLong()).build()
+//        )
+
+
+    }
+
+    private fun onApplicationConnected(castSession: CastSession) {
+        mCastSession = castSession
+        if (null != mSelectedMedia) {
+//            loadRemoteMedia(contentSeekBar!!.progress, true)
+        }
+    }
+
+//    private fun onApplicationDisconnected() {
+//        updatePlaybackLocation(PlaybackLocation.LOCAL)
+//        mPlaybackState = PlaybackState.IDLE
+//        mLocation = PlaybackLocation.LOCAL
+//        updatePlayButton(mPlaybackState)
+//        invalidateOptionsMenu()
+//    }
+
+    fun mediaTracker(episode: Episode) {
+        val englishSubtitle = MediaTrack.Builder(1 /* ID */, MediaTrack.TYPE_TEXT)
+            .setName("English Subtitle")
+            .setSubtype(MediaTrack.SUBTYPE_SUBTITLES)
+            .setContentId("https://some-url/caption_en.vtt")
+            /* language is required for subtitle type but optional otherwise */
+            .setLanguage("en-US")
+            .build()
+
+        val tracks: MutableList<MediaTrack> = ArrayList<MediaTrack>()
+        tracks.add(englishSubtitle)
+        val mediaInfo = MediaInfo.Builder(episode.url)
+            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+//            .setContentType(getContentType())
+//            .setMetadata(getMetadata())
+            .setMediaTracks(tracks)
+            .build()
+
+    }
+
+    private val PRELOAD_TIME_S = 20
+    fun loadVideo(mEpisode: Episode, mPlayer : JWPlayer) {
+        remoteMediaClient = mCastSession!!.remoteMediaClient
+        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
+//      movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
+        movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
+//      movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
+
+        Log.i(TAG, "loadVideo: ${mPlayer.duration} - ${mEpisode.media} - ${mEpisode.title}")
+        mSelectedMedia = MediaInfo.Builder(mEpisode.media)
+            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+            .setContentType("videos/mp4")
+            .setMetadata(movieMetadata)
+            .setStreamDuration((mPlayer.duration * 1000).toLong())
+            .build()
+
+        val queueItem: MediaQueueItem = MediaQueueItem.Builder(mSelectedMedia!!).setAutoplay(true)
+//            .setPreloadTime(PRELOAD_TIME_S.toDouble())
+            .build()
+        val newItemArray = arrayOf(queueItem)
+
+//        remoteMediaClient!!.queueLoad(
+//            newItemArray, 0,
+//            MediaStatus.REPEAT_MODE_REPEAT_OFF, JSONObject())
+
+        remoteMediaClient!!.load(mSelectedMedia!!)
+//        remoteMediaClient!!.queueInsertAndPlayItem(queueItem, 0, JSONObject())
+    }
+    override fun onCastStateChanged(point: Int) {
+        //NO_DEVICES_AVAILABLE = 1; NOT_CONNECTED = 2; CONNECTING = 3; CONNECTED = 4;
+        Log.i(TAG, "onCastStateChanged: $point")
+    }
+
+    public interface OnMainScreenVisibilityListener {
+        fun onVisible(isVisible: Boolean)
+        fun onZoom(isVisible: Boolean)
+        fun onToolInfo(title: String)
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* ivChromeCast!!.setOnClickListener {
+
+            //CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item)
+            sec3Timer(customPlayerView)
+
+            val router: MediaRouter = MediaRouter.getInstance(context)
+            val mRoutes: List<MediaRouter.RouteInfo> = router.routes
+            val isCastRoutes = ArrayList<MediaRouter.RouteInfo>()
+            val devices = ArrayList<CastDevice>()
+
+            for (routeInfo in mRoutes) {
+                val device = CastDevice.getFromBundle(routeInfo.extras)
+                if (device != null) {
+                    devices.add(device)
+                    isCastRoutes.add(routeInfo)
+                }
+            }
+
+            if (mCastSession != null) {
+                if (mCastSession!!.isConnected) {
+                    Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
+                    Log.i(
+                        TAG,
+                        "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
+                    )
+                    AalertDialogDisconnectCast(cast!!, mCastSession!!)
+                } else {
+                    remoteMediaClient = mCastSession!!.remoteMediaClient
+
+                    val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+
+                    movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
+//                  movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
+                    movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
+//                  movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
+
+                    mSelectedMedia = MediaInfo.Builder(mEpisode.media)
+                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                        .setContentType("videos/mp4")
+                        .setMetadata(movieMetadata)
+                        .setStreamDuration((customPlayerView.player.duration * 1000).toLong())
+                        .build()
+
+//                    remoteMediaClient!!.load(MediaLoadRequestData.Builder().setMediaInfo(mSelectedMedia).build())
+
+                    loadRemoteMedia(0, true)
+                    AlertDialogCast(cast!!, isCastRoutes)
+                }
+
+            } else {
+                mCastContext = CastContext.getSharedInstance(context)
+                CastButtonFactory.setUpMediaRouteButton(context!!, mediaRouteButton!!)
+                mCastContext!!.addCastStateListener(this)
+                mCastContext!!.addAppVisibilityListener(this)
+                mCastSession = mCastContext!!.sessionManager.currentCastSession
+                mCastContext!!.sessionManager.addSessionManagerListener(
+                    this,
+                    CastSession::class.java
+                )
+                AlertDialogCast(cast!!, isCastRoutes)
+            }
+        }
+
+                ZoomInOut!!.setOnClickListener {
+            sec3Timer(customPlayerView)
+            val widthDp = context.resources.displayMetrics.run { widthPixels / density }
+            val heightDp = context.resources.displayMetrics.run { heightPixels / density }
+
+            if (customPlayerView.player.fullscreen) {
+                ZoomInOut!!.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        context,
+                        R.drawable.ic_aspect_ratio
+                    )
+                )
+                mVideoSetting!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    setMargins(dpFormat(12), dpFormat(12), dpFormat(12), dpFormat(12))
+                }
+            } else {
+                ZoomInOut!!.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        context,
+                        R.drawable.ic_full_screen
+                    )
+                )
+            }
+            customPlayerView.toggleFullscreen()
+        }
+
+                mediaRouteButton!!.setOnClickListener {
+            CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton!!)
+        }
+
+
+
+        private fun AlertDialogCast(
         cast: CastingMenuViewModel,
         listRoutes: List<MediaRouter.RouteInfo>
     ) {
@@ -660,280 +931,4 @@ class CustomPlayerView(
         dialog.show()
     }
 
-    var positionSeason = 0
-    var positionEpisode = 0
-    private fun AlertDialogPlayList(
-        customPlayerView: CustomPlayerViewModel,
-        season: List<Season>,
-        playerConfig: PlayerConfig
-    ) {
-        val dialog = Dialog(
-            context,
-            android.R.style.Theme_Black_NoTitleBar_Fullscreen
-        ) // where "this" is the context
-
-        val binding: FragmentPlayListSeasonBinding =
-            DataBindingUtil.inflate(
-                dialog.layoutInflater,
-                R.layout.fragment_play_list_season,
-                null,
-                false
-            )
-
-        val listSeason = ArrayList<String>()
-        for (i in season.indices) {
-            listSeason.add("Season ${i + 1}")
-        }
-
-        val adapterSpinner =
-            ArrayAdapter(context, R.layout.layout_textview, listSeason)
-        binding.spSeason.adapter = adapterSpinner
-
-        binding.spSeason.setSelection(positionSeason)
-        binding.spSeason.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val adapter = PlayListSeasonAdapter(
-                    context,
-                    season[position].episodes,
-                    object : PlayListSeasonAdapter.CastDevicesInterface {
-                        override fun onVideoClick(data: Episode, posVideo: Int) {
-                            positionEpisode = posVideo
-                            val playlist: MutableList<PlaylistItem> = ArrayList()
-                            for (episode in season[position].episodes) {
-                                val caption = Caption.Builder()
-                                    .file("file:///android_asset/press-play-captions.vtt")
-                                    .kind(CaptionType.CAPTIONS)
-                                    .label("en")
-                                    .isDefault(true)
-                                    .build()
-                                val captionList: MutableList<Caption> = ArrayList()
-                                captionList.add(caption)
-
-                                val pi = PlaylistItem.Builder()
-                                    .description(episode.description)
-                                    .file(episode.media)
-                                    .image(episode.original_thumbnail_file)
-                                    .tracks(captionList)
-                                    .title(episode.title)
-                                    .build()
-
-                                playlist.add(pi)
-                            }
-
-                            customPlayerView.player.setup(
-                                PlayerConfig.Builder()
-                                    .playlist(playlist)
-                                    .playlistIndex(posVideo)
-                                    .uiConfig(playerConfig.mUiConfig)
-                                    .autostart(true)
-                                    .build()
-                            )
-
-                            dialog.dismiss()
-                        }
-                    })
-
-                binding.adapterPlayList = adapter
-                positionSeason = position
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        dialog.window?.setBackgroundDrawableResource(R.color.transparent75)
-
-        binding.ivClose.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.setContentView(binding.root)
-        dialog.show()
-    }
-
-    fun dpFormat(dp: Int): Int {
-        val displayMetrics = context.resources.displayMetrics
-        return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
-    }
-
-    override fun onSessionEnded(session: CastSession, p1: Int) {
-        Log.i(TAG, "onSessionEnded")
-    }
-
-    override fun onSessionEnding(session: CastSession) {
-        Log.i(TAG, "onSessionEnding")
-    }
-
-    override fun onSessionResumeFailed(session: CastSession, p1: Int) {
-        Log.i(TAG, "onSessionResumeFailed")
-    }
-
-    override fun onSessionResumed(session: CastSession, p1: Boolean) {
-        Log.i(TAG, "onSessionResumed")
-        onApplicationConnected(session)
-    }
-
-    override fun onSessionResuming(session: CastSession, p1: String) {
-        Log.i(TAG, "onSessionResuming")
-
-    }
-
-    override fun onSessionStartFailed(session: CastSession, p1: Int) {
-        Log.i(TAG, "onSessionStartFailed")
-    }
-
-    override fun onSessionStarted(session: CastSession, p1: String) {
-        Log.i(TAG, "onSessionStarted")
-        onApplicationConnected(session)
-    }
-
-    override fun onSessionStarting(session: CastSession) {
-        Log.i(TAG, "onSessionStarting")
-    }
-
-    override fun onSessionSuspended(session: CastSession, p1: Int) {
-        Log.i(TAG, "onSessionSuspended")
-    }
-
-    private var mIntroductoryOverlay: IntroductoryOverlay? = null
-    private fun showIntroductoryOverlay() {
-        if (mIntroductoryOverlay != null) {
-            mIntroductoryOverlay!!.remove()
-            return
-        }
-//        Handler().post {
-//            mIntroductoryOverlay = IntroductoryOverlay.Builder(this, mediaRouteButton)
-//                .setTitleText("Casting..")
-//                .setOverlayColor(R.color.skyblue)
-//                .setSingleTime()
-//                .setOnOverlayDismissedListener(
-//                    OnOverlayDismissedListener { mIntroductoryOverlay = null })
-//                .build()
-//            mIntroductoryOverlay!!.show()
-//        }
-    }
-
-//    public class MyMediaIntentReceiver : MediaIntentReceiver() {
-//        override fun onReceiveOtherAction(action: String, intent: Intent) {
-//
-//        }
-//    }
-
-
-    private fun loadRemoteMedia(position: Int, autoPlay: Boolean) {
-        if (mCastSession == null) {
-            Toast.makeText(context, "RETURN", Toast.LENGTH_LONG).show()
-            return
-        }
-        remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
-        remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
-            override fun onStatusUpdated() {
-                Toast.makeText(context, "STARTA", Toast.LENGTH_LONG).show()
-                val intent = Intent(context, ExpandedControlsActivity::class.java)
-                context.startActivity(intent)
-                remoteMediaClient!!.unregisterCallback(this)
-            }
-        })
-        remoteMediaClient!!.load(
-            MediaLoadRequestData.Builder()
-                .setMediaInfo(mSelectedMedia)
-                .setAutoplay(autoPlay)
-                .setCurrentTime(position.toLong()).build()
-        )
-    }
-
-    private fun onApplicationConnected(castSession: CastSession) {
-        mCastSession = castSession
-        if (null != mSelectedMedia) {
-            loadRemoteMedia(contentSeekBar!!.progress, true)
-        }
-    }
-
-//    private fun onApplicationDisconnected() {
-//        updatePlaybackLocation(PlaybackLocation.LOCAL)
-//        mPlaybackState = PlaybackState.IDLE
-//        mLocation = PlaybackLocation.LOCAL
-//        updatePlayButton(mPlaybackState)
-//        invalidateOptionsMenu()
-//    }
-
-    fun mediaTracker(episode: Episode) {
-        val englishSubtitle = MediaTrack.Builder(1 /* ID */, MediaTrack.TYPE_TEXT)
-            .setName("English Subtitle")
-            .setSubtype(MediaTrack.SUBTYPE_SUBTITLES)
-            .setContentId("https://some-url/caption_en.vtt")
-            /* language is required for subtitle type but optional otherwise */
-            .setLanguage("en-US")
-            .build()
-
-        val tracks: MutableList<MediaTrack> = ArrayList<MediaTrack>()
-        tracks.add(englishSubtitle)
-        val mediaInfo = MediaInfo.Builder(episode.url)
-            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-//            .setContentType(getContentType())
-//            .setMetadata(getMetadata())
-            .setMediaTracks(tracks)
-            .build()
-
-    }
-
-    override fun onCastStateChanged(point: Int) {
-//        TODO("Not yet implemented")
-        Log.i(TAG, "onCastStateChanged: $point")
-    }
-
-    override fun onAppEnteredBackground() {
-//        TODO("Not yet implemented")
-        Log.i(TAG, "onAppEnteredBackground:")
-    }
-
-    override fun onAppEnteredForeground() {
-//        TODO("Not yet implemented")
-        Log.i(TAG, "onAppEnteredForeground:")
-    }
-
-//    override fun getButtonSlotCount(): Int {
-////        TODO("Not yet implemented")
-//    }
-//
-//    override fun getButtonTypeAt(p0: Int): Int {
-////        TODO("Not yet implemented")
-//    }
-//
-//    override fun getButtonImageViewAt(p0: Int): ImageView {
-////        TODO("Not yet implemented")
-//    }
-//
-//    override fun getUIMediaController(): UIMediaController? {
-////        TODO("Not yet implemented")
-//    }
-
-    private fun getScreenResolutionRealMetric(context: Context): String? {
-        val metrics = DisplayMetrics()
-        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(
-            metrics
-        )
-        return "{" + metrics.widthPixels + "," + metrics.heightPixels + "}"
-    }
-
-    private fun getScreenResolutionMetric(context: Context): String? {
-        val metrics = DisplayMetrics()
-        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getMetrics(
-            metrics
-        )
-        return "{" + metrics.widthPixels + "," + metrics.heightPixels + "}"
-    }
-
-    public interface OnMainScreenVisibilityListener {
-        fun onVisible(isVisible: Boolean)
-        fun onZoom(isVisible: Boolean)
-        fun onToolInfo(title: String)
-    }
-
-
-}
+        */

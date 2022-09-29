@@ -37,7 +37,7 @@ class CastOptionsProvider : OptionsProvider {
             .build()
         return CastOptions.Builder()
             .setLaunchOptions(launchOptions)
-            .setReceiverApplicationId(DEFAULT_APPLICATION_ID)
+//            .setReceiverApplicationId(DEFAULT_APPLICATION_ID)
             .setReceiverApplicationId(context.getString(R.string.app_id1))
             .setCastMediaOptions(mediaOptions)
             .build()
