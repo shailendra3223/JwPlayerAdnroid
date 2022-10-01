@@ -67,8 +67,6 @@ class CustomPlayerView(
     private var ivFastBackward15: ImageView? = null
     private var mListener: OnMainScreenVisibilityListener? = null
 
-    var halfHeightDp = 0
-    var marginTop = 0
 
     @JvmOverloads
     constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
@@ -116,8 +114,15 @@ class CustomPlayerView(
         val widthDp = resources.displayMetrics.run { widthPixels / density }
         val heightDp = resources.displayMetrics.run { heightPixels / density }
 
-        halfHeightDp = (heightDp / 2).toInt()
-        marginTop = (halfHeightDp/2)
+        var halfHeightDp = (heightDp / 2).toInt() - 30
+        var marginTop = 0
+
+        if (halfHeightDp < 140) {
+            halfHeightDp -= 15
+            marginTop = (halfHeightDp/2).toInt() - 15
+        } else {
+            marginTop = (halfHeightDp/2).toInt()
+        }
 
         if (marginTop <= 0) {
             marginTop = (halfHeightDp / 2).toInt()
@@ -125,20 +130,19 @@ class CustomPlayerView(
 
         Log.i(TAG, "onZoomUpdate5x: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
 
-//        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
-//        }
-
         mCastContext = castContext
         mCastContext!!.addCastStateListener(this)
         mCastSession = mCastContext!!.sessionManager.currentCastSession
         mCastContext!!.sessionManager.addSessionManagerListener(this, CastSession::class.java)
         cast = customPlayerView.player.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
 
+        playToggle!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            setMargins(dpFormat(10), dpFormat(halfHeightDp), dpFormat(2), dpFormat(4))
+        }
+
         contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
         }
-
 
         if (mCastSession!=null && mCastSession!!.isConnected) {
             customPlayerView.player.pause()
@@ -251,6 +255,7 @@ class CustomPlayerView(
                 visibilityComponents(GONE)
             }
         }
+
         contentSeekBar!!.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -288,26 +293,22 @@ class CustomPlayerView(
     fun onZoomUpdate(isFull: Boolean) {
         sec3Timer(null)
 
-        val widthDp = resources.displayMetrics.run { widthPixels / density }
-        val heightDp = resources.displayMetrics.run { heightPixels / density }
+//        val widthDp = resources.displayMetrics.run { widthPixels / density }
+//        val heightDp = resources.displayMetrics.run { heightPixels / density }
+//
+//        val halfHeightDp = (heightDp / 2).toInt() - 60
+//
+//        var marginTop = (halfHeightDp / 2) - 20
+//
+//
+//        if (marginTop <= 0) {
+//            marginTop = (halfHeightDp / 2).toInt()
+//        }
 
-        halfHeightDp = (heightDp / 2).toInt()
-
-        marginTop = if (isFull) {
-            (halfHeightDp / 2) - 20
-        } else {
-            (halfHeightDp / 2)
-        }
-
-
-        if (marginTop <= 0) {
-            marginTop = (halfHeightDp / 2).toInt()
-        }
-
-        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
-        contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
-        }
+//        Log.i(TAG, "onZoomUpdate5: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
+//        contentSeekBar!!.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//            setMargins(dpFormat(10), dpFormat(marginTop), dpFormat(2), dpFormat(4))
+//        }
     }
 
     var countDown: CountDownTimer? = null
@@ -412,7 +413,11 @@ class CustomPlayerView(
             val isSelect = (mValueQuality != null && mValueQuality!!.trackIndex == item.trackIndex)
 
             if (item.label.toString().contains("Auto")) {
-                list.add(SelectItem(0.0, item, null, null, isSelect))
+                if (mValueQuality == null) {
+                    list.add(SelectItem(0.0, item, null, null, true))
+                } else{
+                    list.add(SelectItem(0.0, item, null, null, isSelect))
+                }
             } else if (item.label.toString().contains("1080p") && isFHD) {
                 isFHD = false
                 list.add(SelectItem(0.0, item, null, null, isSelect))
@@ -455,7 +460,7 @@ class CustomPlayerView(
         initView(mContext)
     }
 
-    var mValuePlayRate: Double = 0.0
+    var mValuePlayRate: Double = 1.0
     var mValueQuality: QualityLevel? = null
     var mValueAudio: AudioTrack? = null
     var mValueSubtitle: Caption? = null
