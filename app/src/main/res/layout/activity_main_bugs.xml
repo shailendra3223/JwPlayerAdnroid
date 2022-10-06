@@ -20,8 +20,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="H,16:9"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -170,6 +172,49 @@
         <!--            android:contentDescription="@string/jwplayer_exit_fullscreen"-->
         <!--            android:visibility="gone"-->
         <!--            tools:visibility="visible"/>-->
+
+
+<!--        <com.google.android.material.slider.Slider-->
+<!--            android:layout_width="15dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:minHeight="120dp"-->
+<!--            android:maxHeight="160dp"-->
+<!--            android:stepSize="0"-->
+<!--            android:valueFrom="0.0"-->
+<!--            android:valueTo="100.0"-->
+<!--            android:layout_margin="12dp"-->
+<!--            android:rotation="270"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/seekbar"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/toolbar" />-->
+
+      <!--  <SeekBar
+            android:id="@+id/seek_bar_1"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:rotation="270"
+            android:progress="100"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/seekbar"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"/>-->
+
+
+        <SeekBar
+            android:id="@+id/seek_bar_1"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_margin="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="24dp"
+            android:progressBackgroundTint="@color/white"
+            android:progressTint="@color/red"
+            android:thumbTint="@color/white"
+            android:visibility="visible"
+            android:rotation="270"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/seekbar"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            tools:visibility="visible" />
 
         <SeekBar
             android:id="@+id/seekbar"
