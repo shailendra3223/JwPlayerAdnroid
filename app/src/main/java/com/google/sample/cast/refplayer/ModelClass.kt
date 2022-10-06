@@ -1,5 +1,7 @@
 package com.google.sample.cast.refplayer
 
+import com.jwplayer.pub.api.media.adaptive.QualityLevel
+import com.jwplayer.pub.api.media.captions.Caption
 import java.util.*
 
 class ModelClass : ArrayList<ModelClassItem>()
@@ -50,7 +52,9 @@ data class Episode(
     val trailer: Any,
     val trailer_file: String,
     val url: String,
-    val year: Int
+    val year: Int,
+    var captionList: List<Caption>,
+    var qualityLevelList: List<QualityLevel>
 )
 
 data class Season(

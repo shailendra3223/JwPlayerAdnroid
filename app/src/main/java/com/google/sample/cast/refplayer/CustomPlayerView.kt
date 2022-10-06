@@ -1,6 +1,7 @@
 package com.google.sample.cast.refplayer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -24,6 +25,8 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
 import com.google.sample.cast.refplayer.adapter.PlayListSeasonAdapter
 import com.google.sample.cast.refplayer.adapter.SelectAdapter
+import com.google.sample.cast.refplayer.cast.CustomUIController
+import com.google.sample.cast.refplayer.cast.CustomUIMediaController
 import com.google.sample.cast.refplayer.cast.ExpandedControlsActivity
 import com.google.sample.cast.refplayer.databinding.DialogPlayrateSubtitleBinding
 import com.google.sample.cast.refplayer.databinding.FragmentPlayListSeasonBinding
@@ -39,7 +42,6 @@ import com.jwplayer.pub.api.media.playlists.PlaylistItem
 import com.jwplayer.pub.ui.viewmodels.CastingMenuViewModel
 import com.jwplayer.pub.ui.viewmodels.PlaylistViewModel
 import com.jwplayer.pub.view.JWPlayerView
-import org.json.JSONObject
 import kotlin.math.roundToInt
 
 
@@ -67,6 +69,11 @@ class CustomPlayerView(
     private var ivFastBackward15: ImageView? = null
     private var mListener: OnMainScreenVisibilityListener? = null
 
+    private lateinit var nPlayer: JWPlayer
+    private lateinit var containerAll: View
+//    private var containerAll: View? = null
+    var nUiMediaController: CustomUIMediaController? = null
+    var nUiController: CustomUIController? = null
 
     @JvmOverloads
     constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
@@ -82,7 +89,12 @@ class CustomPlayerView(
     }
 
     private fun initView(context: Context?) {
-        inflate(context, R.layout.view_custom_player_ui, this)
+        containerAll = inflate(context, R.layout.view_custom_player_ui, this)
+//        val binding: ViewCustomPlayerUiBinding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.view_custom_player_ui, null, true)
+//        val content = findViewById<ViewGroup>(android.R.id.content)
+//        binding = MainActivity.inflate(layoutInflater, content)
+//        val containerAll = findViewById<View>(R.id.cl_parent_view)
+//        val mergeBinding = ViewCustomPlayerUiBinding.bind(binding.root)
         mVideoSetting = findViewById(R.id.tv_video_setting)
         mEpisodes = findViewById(R.id.tv_episode)
         mSubtitleAudio = findViewById(R.id.tv_subtitle)
@@ -93,6 +105,9 @@ class CustomPlayerView(
         ivFastForward15 = findViewById(R.id.tv_fast_forward_15)
         ivFastBackward15 = findViewById(R.id.tv_fast_backward_15)
         tvTime = findViewById(R.id.tv_time)
+
+        nUiController = CustomUIController(containerAll)
+
     }
 
     var cast: CastingMenuViewModel? = null
@@ -100,6 +115,11 @@ class CustomPlayerView(
     var mCastSession: CastSession? = null
     var mSelectedMedia: MediaInfo? = null
     var remoteMediaClient: RemoteMediaClient? = null
+
+
+    init {
+        initView(mContext)
+    }
 
     @SuppressLint("SetTextI18n")
     fun bindSettingPan(
@@ -111,6 +131,23 @@ class CustomPlayerView(
         jwplayerView: JWPlayerView,
         castContext: CastContext
     ) {
+
+//        val myActivity: MainActivity = lifecycleOwner as MainActivity
+        nUiMediaController = CustomUIMediaController(lifecycleOwner as Activity)
+
+        nUiMediaController!!.bindViewToUIController(containerAll, nUiController!!)
+        nUiMediaController!!.bindImageViewToPlayPauseToggle(playToggle!!,
+            resources.getDrawable(R.drawable.ic_jw_play),
+            resources.getDrawable(R.drawable.ic_jw_pause),
+            resources.getDrawable(R.drawable.ic_jw_pause),
+            containerAll,
+            false
+        )
+//        nUiMediaController!!.bindTextViewToMetadataOfCurrentItem(mTitle!!, "com.google.android.gms.cast.metadata.TITLE")
+//        nUiMediaController!!.bindTextViewToSmartSubtitle(mSubtitleAudio!!)
+//        nUiMediaController!!.bindViewToLaunchExpandedController(containerAll)
+
+        nPlayer = customPlayerView.player
         val widthDp = resources.displayMetrics.run { widthPixels / density }
         val heightDp = resources.displayMetrics.run { heightPixels / density }
 
@@ -181,6 +218,10 @@ class CustomPlayerView(
 //            customPlayerView.player.pause()
             visibilityComponents(GONE)
             AlertDialogPlayer(customPlayerView, 1003)
+        }
+
+        containerAll.setOnClickListener {
+            sec3Timer(customPlayerView)
         }
 
         mEpisodes!!.setOnClickListener {
@@ -456,10 +497,6 @@ class CustomPlayerView(
         return SelectAdapter(context, list, 1004, this)
     }
 
-    init {
-        initView(mContext)
-    }
-
     var mValuePlayRate: Double = 1.0
     var mValueQuality: QualityLevel? = null
     var mValueAudio: AudioTrack? = null
@@ -595,6 +632,9 @@ class CustomPlayerView(
 
     override fun onSessionEnded(session: CastSession, p1: Int) {
         Log.i(TAG, "onSessionEnded")
+        if (nPlayer != null) {
+            nPlayer.play()
+        }
     }
 
     override fun onSessionEnding(session: CastSession) {
@@ -603,6 +643,9 @@ class CustomPlayerView(
 
     override fun onSessionResumeFailed(session: CastSession, p1: Int) {
         Log.i(TAG, "onSessionResumeFailed")
+        if (nPlayer != null) {
+            nPlayer.play()
+        }
     }
 
     override fun onSessionResumed(session: CastSession, p1: Boolean) {
@@ -747,6 +790,7 @@ class CustomPlayerView(
         remoteMediaClient!!.load(mSelectedMedia!!)
 //        remoteMediaClient!!.queueInsertAndPlayItem(queueItem, 0, JSONObject())
     }
+
     override fun onCastStateChanged(point: Int) {
         //NO_DEVICES_AVAILABLE = 1; NOT_CONNECTED = 2; CONNECTING = 3; CONNECTED = 4;
         Log.i(TAG, "onCastStateChanged: $point")

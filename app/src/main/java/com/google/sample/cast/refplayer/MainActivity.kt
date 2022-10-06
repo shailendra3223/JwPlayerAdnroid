@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -64,10 +65,8 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
-
-//
 
 //        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
@@ -343,10 +342,15 @@ class MainActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListener
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.expanded_controller, menu)
-        CastButtonFactory.setUpMediaRouteButton(
+        val itemCast = CastButtonFactory.setUpMediaRouteButton(
             applicationContext, menu,
             R.id.media_route_menu_item
         )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            itemCast.actionView.defaultFocusHighlightEnabled = false
+        }
+
         return true
     }
 

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container_all"
+        tools:context=".bugs.MainBugsActivity">
+
+        <com.jwplayer.pub.view.JWPlayerView
+            android:id="@+id/mPlayerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="12dp"
+            android:background="@color/jw_transparent"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/expanded_controller"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+
+        <!--        <View-->
+        <!--            android:id="@id/cl_parent_view"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
+
+        <ImageView
+            android:id="@+id/tv_fast_backward_15"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_replay"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/play_pause_toggle"
+            app:layout_constraintHorizontal_bias="0.45"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <ImageView
+            android:id="@+id/play_pause_toggle"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="60dp"
+            android:src="@drawable/ic_jw_play"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/tv_fast_forward_15"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_forward"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_bias="0.55"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/play_pause_toggle"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            tools:text="@string/subtitles_amp_audio"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_margin="10dp"
+            app:drawableStartCompat="@drawable/ic_jw_close"
+            app:drawableTint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            tools:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/iv_zoom_in_out"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:contentDescription="@string/jwplayer_chromecast"
+            android:padding="10dp"
+            android:src="@drawable/ic_full_screen"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintEnd_toStartOf="@+id/iv_chrome_cast"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
+            android:visibility="gone"
+            tools:visibility="gone" />
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_chrome_cast"-->
+        <!--            android:layout_width="50dp"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_marginVertical="10dp"-->
+        <!--            android:contentDescription="@string/jwplayer_chromecast"-->
+        <!--            android:src="@drawable/ic_jw_cast_off"-->
+        <!--            android:visibility="gone"-->
+
+        <!--            app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@+id/tv_title"-->
+        <!--            app:layout_constraintEnd_toEndOf="@+id/tv_time"-->
+        <!--            app:layout_constraintRight_toRightOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="@+id/tv_title"-->
+        <!--            tools:visibility="visible" />        -->
+
+        <ImageView
+            android:id="@+id/iv_chrome_cast"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginVertical="10dp"
+            android:contentDescription="@string/jwplayer_chromecast"
+            android:src="@drawable/ic_jw_cast_off"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintEnd_toEndOf="@+id/tv_time"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
+            tools:visibility="gone" />
+
+        <androidx.mediarouter.app.MediaRouteButton
+            android:id="@+id/media_route_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:mediaRouteTypes="user"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/iv_chrome_cast"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_chrome_cast"
+            tools:visibility="gone" />
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_exit_fullscreen"-->
+        <!--            android:layout_width="50dp"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_marginEnd="10dp"-->
+        <!--            android:layout_marginBottom="4dp"-->
+        <!--            android:src="@drawable/ic_jw_exit_fullscreen"-->
+        <!--            app:layout_constraintBottom_toTopOf="@+id/seekbar"-->
+        <!--            app:layout_constraintEnd_toEndOf="@+id/seekbar"-->
+        <!--            app:layout_constraintRight_toRightOf="parent"-->
+        <!--            android:contentDescription="@string/jwplayer_exit_fullscreen"-->
+        <!--            android:visibility="gone"-->
+        <!--            tools:visibility="visible"/>-->
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="24dp"
+            android:progressBackgroundTint="@color/white"
+            android:progressTint="@color/red"
+            android:thumbTint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/tv_video_setting"
+            app:layout_constraintEnd_toStartOf="@+id/tv_time"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            tools:text="00:00:00"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintBottom_toBottomOf="@+id/seekbar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/seekbar"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_video_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="32dp"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:text="@string/video_setting"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_video_setting"
+            app:drawableTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_episode"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/tv_subtitle"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/jwplayer_subtitles"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_subtitles"
+            app:drawableTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_video_setting"
+            app:layout_constraintEnd_toStartOf="@+id/tv_video_setting"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_video_setting"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_episode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/episodes"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_episode"
+            app:drawableTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_video_setting"
+            app:layout_constraintEnd_toStartOf="@+id/tv_next_episode"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/tv_video_setting"
+            app:layout_constraintTop_toTopOf="@+id/tv_video_setting"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_next_episode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            android:text="@string/jwplayer_next_up"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_next_episode"
+            app:drawableTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_video_setting"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/tv_episode"
+            app:layout_constraintTop_toTopOf="@+id/tv_video_setting"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

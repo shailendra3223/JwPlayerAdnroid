@@ -43,7 +43,7 @@ class SelectAdapter(
 
 //                binding.view.visibility = GONE
 
-                if(data.valueSubtitle!!.label.toString().contains("en")) {
+                if(data.valueSubtitle!!.label.toString().contains("eng")) {
                     binding.tvItemName.text = "English"
                 } else {
                     binding.tvItemName.text = data.valueSubtitle!!.label.toString()
