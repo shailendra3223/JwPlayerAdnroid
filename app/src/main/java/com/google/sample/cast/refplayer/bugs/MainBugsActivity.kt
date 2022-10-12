@@ -1,10 +1,13 @@
 package com.google.sample.cast.refplayer.bugs
 
 import android.app.Dialog
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.webkit.WebView
@@ -12,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -72,13 +76,10 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
     private var listChromcastEpisode = ArrayList<MediaQueueItem>()
 
-    private val mRemoteMediaClientCallback: RemoteMediaClient.Callback =
-        MyRemoteMediaClientCallback()
-
     var seasonHashMap: HashMap<Int,Int> = HashMap()
 
-//    var nQualityLevel: ArrayList<QualityLevel> = ArrayList()
-    val nSubtitle = ArrayList<Caption>()
+    private var VAL_BRIGHTNESS = 0f
+    private var VAL_VOLUME = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,8 +98,20 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
 
         mCastContext = CastContext.getSharedInstance(this)
-        mCastSession = mCastContext!!.sessionManager.currentCastSession
+        mCastSession = mCastContext?.sessionManager?.currentCastSession
         mCastContext!!.addCastStateListener(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            val settingsCanWrite = hasWriteSettingsPermission(this)
+
+            if (!settingsCanWrite) {
+                changeWriteSettingsPermission(this)
+            } else {
+                VAL_BRIGHTNESS = getScreenBrightness().toFloat()
+                Log.i(TAG, "onCreate: ${VAL_BRIGHTNESS}")
+            }
+        }
 
         binding.mPlayerView.getPlayerAsync(this, this) { jwPlayer: JWPlayer? ->
             mPlayer = jwPlayer
@@ -258,19 +271,26 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         setSupportActionBar(binding.toolbar)
     }
 
+    var isFull = false
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.aspect_ratio_menu -> {
                 sec3Timer()
-                val isFull = mPlayer!!.fullscreen
+//                val isFull = mPlayer!!.fullscreen
                 if (isFull) {
+                    isFull = false
                     item.setIcon(R.drawable.ic_aspect_ratio)
+                    binding.mPlayerView.scaleX = 1.0f
+                    binding.mPlayerView.scaleY = 1.0f
                 } else {
+                    isFull = true
                     item.setIcon(R.drawable.ic_full_screen)
+                    binding.mPlayerView.scaleX = 1.25f
+                    binding.mPlayerView.scaleY = 1.25f
                 }
 
 //                controls!!.onZoomUpdatePan(isFull)
-                mPlayer!!.setFullscreen(!isFull, true)
+//                mPlayer!!.setFullscreen(!isFull, true)
             }
         }
         return true
@@ -280,30 +300,36 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     private fun setupCastListener() {
         mSessionManagerListener = object : SessionManagerListener<CastSession> {
             override fun onSessionEnded(session: CastSession, error: Int) {
+                Log.i(TAG, "onSessionEnded")
                 onApplicationDisconnected()
             }
 
             override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
+                Log.i(TAG, "onSessionResume")
                 onApplicationConnected(session)
             }
 
             override fun onSessionResumeFailed(session: CastSession, error: Int) {
+                Log.i(TAG, "onSessionResumeFailed")
                 onApplicationDisconnected()
             }
 
             override fun onSessionStarted(session: CastSession, sessionId: String) {
+                Log.i(TAG, "onSessionStarted")
                 onApplicationConnected(session)
             }
 
             override fun onSessionStartFailed(session: CastSession, error: Int) {
+                Log.i(TAG, "onSessionFailed")
                 onApplicationDisconnected()
             }
 
-            override fun onSessionStarting(session: CastSession) {}
-            override fun onSessionEnding(session: CastSession) {}
-            override fun onSessionResuming(session: CastSession, sessionId: String) {}
-            override fun onSessionSuspended(session: CastSession, reason: Int) {}
+            override fun onSessionStarting(session: CastSession) {Log.i(TAG, "onSessionStarting")}
+            override fun onSessionEnding(session: CastSession) {Log.i(TAG, "onSessionEnding")}
+            override fun onSessionResuming(session: CastSession, sessionId: String) {Log.i(TAG, "onSessionResuming")}
+            override fun onSessionSuspended(session: CastSession, reason: Int) {Log.i(TAG, "onSessionSuspended")}
             private fun onApplicationConnected(castSession: CastSession) {
+                Log.i(TAG, "onSessionConnected")
                 mCastSession = castSession
 //                if (null != mMediaInfo) {
 
@@ -326,9 +352,14 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //                mPlaybackState = PlaybackState.IDLE
 //                mLocation = LOCAL
 //                updatePlayButton(mPlaybackState)
+
+
                 if (mPlayer != null) {
-                    mPlayer!!.play()
+//                    mPlayer!!.play()
+                    mPlayer!!.playlistItem(positionEpisode)
+//                    Log.i(TAG, "onApplicationDisconnected: ${mPlayer!!.playlistItem(positionEpisode)}")
                 }
+                Log.i(TAG, "onApplicationDisconnected: ${mPlayer}")
 //                remoteMediaClient!!.unregisterCallback(this)
                 invalidateOptionsMenu()
             }
@@ -357,10 +388,7 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             customeData
         )
 
-        Log.i(
-            TAG,
-            "listChromcastEpisode: ${positionEpisode} ${listChromcastEpisode[positionEpisode].itemId}"
-        )
+        Log.i(TAG, "listChromcastEpisode: ${positionEpisode} ${listChromcastEpisode[positionEpisode].itemId}")
 
 
         remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
@@ -432,23 +460,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         data: ModelClass
     ) {
 
-//        val myActivity: MainActivity = lifecycleOwner as MainActivity
-        /*  nUiMediaController = CustomUIMediaController(lifecycleOwner as Activity)
-
-          nUiMediaController!!.bindViewToUIController(binding.containerAll, nUiController!!)
-          nUiMediaController!!.bindImageViewToPlayPauseToggle(binding.playPauseToggle,
-              resources.getDrawable(R.drawable.ic_jw_play),
-              resources.getDrawable(R.drawable.ic_jw_pause),
-              resources.getDrawable(R.drawable.ic_jw_pause),
-              binding.containerAll,
-              false
-          )*/
-//        nUiMediaController!!.bindTextViewToMetadataOfCurrentItem(mTitle!!, "com.google.android.gms.cast.metadata.TITLE")
-//        nUiMediaController!!.bindTextViewToSmartSubtitle(mSubtitleAudio!!)
-//        nUiMediaController!!.bindViewToLaunchExpandedController(binding.containerAll)
-
-
         val cast = mPlayer!!.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
+        VAL_VOLUME = mPlayer!!.volume
 
         if (mCastSession != null && mCastSession!!.isConnected) {
             mPlayer!!.pause()
@@ -511,6 +524,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //                    remoteMediaClient!!.queueJumpToItem(listChromcastEpisode[positionEpisode].itemId, JSONObject())
                     loadRemoteMedia(positionEpisode, true)
                 }
+                Log.i(TAG, "bindSettingPan: ${listChromcastEpisode[positionEpisode].itemId} ${remoteMediaClient} ${positionEpisode}")
+
                 mPlayer!!.playlistItem(next)
 
             } else {
@@ -519,44 +534,73 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
         }
 
-//        ivFastForward15!!.setOnClickListener {
-//            sec3Timer()
-//            val position = mPlayer!!.position + 30
-//
-//            if (position >= mPlayer!!.duration) {
-//                val next = mPlayer!!.playlistIndex + 1
-//                if (next != mPlayer!!.playlist.size) {
-//                    mPlayer!!.playlistItem(next)
-//                }
-//            } else if (position >= 0) {
-//                mPlayer!!.seek(position)
-//                customPlayerView.handleTimeUpdate(
-//                    position,
-//                    mPlayer!!.duration,
-//                    customPlayerView.contentProgressPercentage
-//                )
-//            }
-//        }
+        binding.tvFastForward15.setOnClickListener {
+            sec3Timer()
+            val position = mPlayer!!.position + 15
 
-//        ivFastBackward15!!.setOnClickListener {
-//            sec3Timer()
-//            val position = mPlayer!!.position - 30
-//            if (position > 31) {
-//                mPlayer!!.seek(position)
-//                customPlayerView.handleTimeUpdate(
-//                    position,
-//                    mPlayer!!.duration,
-//                    customPlayerView.contentProgressPercentage
-//                )
-//            } else {
-//                mPlayer!!.seek(0.1)
-//                customPlayerView.handleTimeUpdate(
-//                    0.1,
-//                    mPlayer!!.duration,
-//                    customPlayerView.contentProgressPercentage
-//                )
-//            }
-//        }
+            /*if (position >= mPlayer!!.duration) {
+                val next = mPlayer!!.playlistIndex + 1
+                if (next != mPlayer!!.playlist.size) {
+                    mPlayer!!.playlistItem(next)
+                }
+            } else */
+            if (position >= 0) {
+                mPlayer!!.seek(position)
+                customPlayerView.handleTimeUpdate(
+                    position,
+                    mPlayer!!.duration,
+                    customPlayerView.contentProgressPercentage
+                )
+            }
+        }
+
+        binding.tvFastBackward15.setOnClickListener {
+            sec3Timer()
+            val position = mPlayer!!.position - 15
+            if (position > 16) {
+                mPlayer!!.seek(position)
+                customPlayerView.handleTimeUpdate(
+                    position,
+                    mPlayer!!.duration,
+                    customPlayerView.contentProgressPercentage
+                )
+            } else {
+                mPlayer!!.seek(0.1)
+                customPlayerView.handleTimeUpdate(
+                    0.1,
+                    mPlayer!!.duration,
+                    customPlayerView.contentProgressPercentage
+                )
+            }
+        }
+
+
+        binding.sliderVolume.addOnChangeListener { slider, value, fromUser ->
+            Log.i(TAG, "bindSettingPan:sliderVolume ${value.toInt()}")
+            VAL_VOLUME = value.toInt()
+            mPlayer!!.volume = VAL_VOLUME
+        }
+
+        binding.sliderBright.addOnChangeListener { slider, progress, fromUser ->
+
+            VAL_BRIGHTNESS = progress
+            Log.i(TAG, "bindSettingPan1: ${progress}")
+//            this.window.attributes.screenBrightness = VAL_BRIGHTNESS
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val settingsCanWrite = hasWriteSettingsPermission(this)
+
+                if (!settingsCanWrite) {
+                    changeWriteSettingsPermission(this)
+                } else {
+                    changeScreenBrightness(progress.toInt())
+                }
+            } else {
+                changeScreenBrightness(progress.toInt())
+            }
+
+            Log.i(TAG, "bindSettingPan2: ${progress}")
+        }
 
 
         //SeekBar
@@ -574,6 +618,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                 visibilityComponents(ConstraintLayout.GONE)
             }
         }
+
+
 
         binding.seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -602,7 +648,7 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
             if (mCastContext!!.castState == CastState.CONNECTED) {
                 Log.w(TAG, "Connected to a cast device")
-//                remoteMediaClient!!.togglePlayback()
+                remoteMediaClient!!.togglePlayback()
 //                val intent = Intent(this, ExpandedControlsActivity::class.java)
 //                startActivity(intent)
             } else {
@@ -636,10 +682,15 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         binding.tvTime.visibility = isVisible
         binding.playPauseToggle.visibility = isVisible
         binding.tvNextEpisode.visibility = isVisible
+        binding.tvFastBackward15.visibility = isVisible
+        binding.tvFastForward15.visibility = isVisible
+        binding.clBright.visibility = isVisible
+        binding.clVolume.visibility = isVisible
         binding.ivChromeCast.visibility = View.GONE
         binding.toolbar.visibility = isVisible
-//        ivFastForward15!!.visibility = isVisible
-//        ivFastBackward15!!.visibility = isVisible
+//        binding.sliderVolume.value = mPlayer!!.volume.toFloat()
+        binding.sliderBright.value = VAL_BRIGHTNESS
+
     }
 
     private fun AlertDialogPlayer(FLAG: Int) {
@@ -979,152 +1030,62 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         }
 
         listChromcastEpisode.addAll(queueList)
+        remoteMediaClient = mCastSession?.remoteMediaClient ?: return
+
+        val customeData = JSONObject()
+        try {
+            customeData.put(CUSTOME_DATA, listChromcastEpisode)
+        } catch (e: Exception) {
+            Log.i(TAG, "queuePlay: exception $e")
+
+        }
+
+        remoteMediaClient!!.queueLoad(
+            listChromcastEpisode.toTypedArray(),
+            0,
+            REPEAT_MODE_REPEAT_OFF,
+            customeData
+        )
 
     }
 
-    private class MyRemoteMediaClientCallback : RemoteMediaClient.Callback() {
-        override fun onStatusUpdated() {
-            updateMediaQueue()
-        }
-
-        override fun onQueueStatusUpdated() {
-            updateMediaQueue()
-        }
-
-        private fun updateMediaQueue() {
-//            val mediaStatus: MediaStatus = mRemoteMediaClient.getMediaStatus()
-//            val queueItems = if (mediaStatus == null) null else mediaStatus.queueItems
-        }
+    // Check whether this app has android write settings permission.
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun hasWriteSettingsPermission(context: Context): Boolean {
+        var ret = true
+        ret = Settings.System.canWrite(context)
+        return ret
     }
 
-
-    private fun AlertDialogCast(
-        cast: CastingMenuViewModel,
-        listRoutes: List<MediaRouter.RouteInfo>
-    ) {
-        val dialog = Dialog(this) // where "this" is the context
-
-        val binding: DialogCastBinding =
-            DataBindingUtil.inflate(
-                dialog.layoutInflater,
-                R.layout.dialog_cast,
-                null,
-                false
-            )
-
-        val adapter =
-            CastSelectAdapter(this, listRoutes, object : CastSelectAdapter.CastDevicesInterface {
-                override fun onConnect(data: MediaRouter.RouteInfo, position: Int) {
-                    dialog.dismiss()
-                    cast.beginCasting(data)
-                }
-            })
-        binding.adapterCast = adapter
-
-        if (listRoutes.isEmpty()) {
-            binding.tvMessage.visibility = View.VISIBLE
-        }
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        binding.tvCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-        dialog.setContentView(binding.root)
-        dialog.show()
+    // Start can modify system settings panel to let user change the write
+    // settings permission.
+    private fun changeWriteSettingsPermission(context: Context) {
+        Toast.makeText(this, "Select Saina App, For Bright Permission", Toast.LENGTH_LONG).show()
+        val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+        context.startActivity(intent)
     }
 
-/*   private fun AalertDialogDisconnectCast(
-        cast: CastingMenuViewModel,
-        castSession: CastSession
-    ) {
-        val dialog = Dialog(this) // where "this" is the context
-
-        val binding: DialogCastBinding =
-            DataBindingUtil.inflate(
-                dialog.layoutInflater,
-                R.layout.dialog_cast,
-                null,
-                false
-            )
-
-        binding.tvCasting.text = "Disconnect the Devices"
-        binding.tvDisconnectDevicesName.text = castSession.castDevice!!.friendlyName
-
-        binding.rvCast.visibility = View.GONE
-        binding.tvDisconnect.visibility = View.VISIBLE
-        binding.tvDisconnectDevicesName.visibility = View.VISIBLE
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        binding.tvCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        binding.tvDisconnect.setOnClickListener {
-            dialog.dismiss()
-            mCastContext!!.sessionManager.endCurrentSession(true)
-        }
-        dialog.setContentView(binding.root)
-        dialog.show()
+    // This function only take effect in real physical android device,
+    // it can not take effect in android emulator.
+    private fun changeScreenBrightness(screenBrightnessValue: Int) {
+        Settings.System.putInt(
+            contentResolver,
+            Settings.System.SCREEN_BRIGHTNESS_MODE,
+            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+        )
+        // Apply the screen brightness value to the system, this will change
+        // the value in Settings ---> Display ---> Brightness level.
+        // It will also change the screen brightness for the device.
+        Settings.System.putInt(
+            contentResolver,
+            Settings.System.SCREEN_BRIGHTNESS, screenBrightnessValue
+        )
     }
 
-
-    binding.ivChromeCast.setOnClickListener {
-        //CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item)
-        sec3Timer()
-
-        val mRoutes: List<MediaRouter.RouteInfo> = MediaRouter.getInstance(this).routes
-        val isCastRoutes = ArrayList<MediaRouter.RouteInfo>()
-        val devices = ArrayList<CastDevice>()
-//            Log.i(TAG, "bindSettingPan1: ${cast.availableDevices.}")
-        for (routeInfo in mRoutes) {
-            val device = CastDevice.getFromBundle(routeInfo.extras)
-            if (device != null) {
-                devices.add(device)
-                isCastRoutes.add(routeInfo)
-            }
-        }
-
-        if (mCastSession != null) {
-            if (mCastSession!!.isConnected) {
-                Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
-                Log.i(TAG, "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
-                )
-                AalertDialogDisconnectCast(cast!!, mCastSession!!)
-            } else {
-//                    remoteMediaClient = mCastSession!!.remoteMediaClient
-
-//                    val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-//
-//                    movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
-////                  movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mEpisode.)
-//                    movieMetadata.addImage(WebImage(Uri.parse(mEpisode.thumbnail_url)))
-////                  movieMetadata.addImage(WebImage(Uri.parse(mEpisode.getImage(1))))
-//
-//                    mSelectedMedia = MediaInfo.Builder(mEpisode.media)
-//                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-//                        .setContentType("videos/mp4")
-//                        .setMetadata(movieMetadata)
-//                        .setStreamDuration((customPlayerView.player.duration * 1000).toLong())
-//                        .build()
-
-//                    remoteMediaClient!!.load(MediaLoadRequestData.Builder().setMediaInfo(mSelectedMedia).build())
-
-//                    loadRemoteMedia(0, true)
-                AlertDialogCast(cast, isCastRoutes!!)
-            }
-
-        } else {
-            mCastContext = CastContext.getSharedInstance(this)
-//                CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton!!)
-            mCastSession = mCastContext!!.sessionManager.currentCastSession
-//                mCastContext!!.sessionManager.addSessionManagerListener(this@MainBugsActivity, CastSession::class.java)
-
-            Log.i(TAG, "bindSettingPan1i: ${isCastRoutes!!.size}")
-            Log.i(TAG, "bindSettingPan1i: ${cast.castingState}")
-            AlertDialogCast(cast, isCastRoutes!!)
-        }
-    }*/
+    private fun getScreenBrightness() : Int {
+        return  Settings.System.getInt(
+            contentResolver,
+            Settings.System.SCREEN_BRIGHTNESS)
+    }
 
 }

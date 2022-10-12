@@ -4,6 +4,9 @@
     package="com.google.sample.cast.refplayer">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+        <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -28,18 +31,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Video2Activity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:exported="true"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.CastVideosDark">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-        <activity
             android:name=".VideoActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:exported="true"
@@ -57,11 +48,11 @@
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.CastVideosDark">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
         <activity
             android:name=".cast.ExpandedControlsActivity"
@@ -71,9 +62,9 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.CastVideosDark">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--            </intent-filter>-->
         </activity>
 
         <meta-data

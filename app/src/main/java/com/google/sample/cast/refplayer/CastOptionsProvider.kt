@@ -10,6 +10,7 @@ import com.google.android.gms.cast.framework.SessionProvider
 import com.google.android.gms.cast.framework.media.*
 import com.google.android.gms.common.images.WebImage
 import com.google.sample.cast.refplayer.R
+import com.google.sample.cast.refplayer.bugs.MainBugsActivity
 import com.google.sample.cast.refplayer.cast.ExpandedControlsActivity
 import java.util.*
 
@@ -23,12 +24,12 @@ class CastOptionsProvider : OptionsProvider {
                     MediaIntentReceiver.ACTION_STOP_CASTING
                 ), intArrayOf(1, 2)
             )
-            .setTargetActivityClassName(ExpandedControlsActivity::class.java.name)
+            .setTargetActivityClassName(MainBugsActivity::class.java.name)
             .build()
         val mediaOptions = CastMediaOptions.Builder()
             .setImagePicker(ImagePickerImpl())
             .setNotificationOptions(notificationOptions)
-            .setExpandedControllerActivityClassName(ExpandedControlsActivity::class.java.name)
+            .setExpandedControllerActivityClassName(MainBugsActivity::class.java.name)
             .build()
 
         /** Following lines enable Cast Connect  */
