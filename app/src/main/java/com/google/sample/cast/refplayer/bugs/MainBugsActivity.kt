@@ -10,6 +10,8 @@ import android.os.CountDownTimer
 import android.provider.Settings
 import android.util.Log
 import android.view.*
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.webkit.WebView
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -20,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
-import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.*
 import com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_OFF
 import com.google.android.gms.cast.framework.*
@@ -30,11 +31,9 @@ import com.google.android.gms.common.images.WebImage
 import com.google.gson.Gson
 import com.google.sample.cast.refplayer.*
 import com.google.sample.cast.refplayer.R
-import com.google.sample.cast.refplayer.adapter.CastSelectAdapter
 import com.google.sample.cast.refplayer.adapter.PlayListSeasonAdapter
 import com.google.sample.cast.refplayer.adapter.SelectAdapter
 import com.google.sample.cast.refplayer.databinding.ActivityMainBugsBinding
-import com.google.sample.cast.refplayer.databinding.DialogCastBinding
 import com.google.sample.cast.refplayer.databinding.DialogPlayrateSubtitleBinding
 import com.google.sample.cast.refplayer.databinding.FragmentPlayListSeasonBinding
 import com.google.sample.cast.refplayer.model.SelectItem
@@ -497,6 +496,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         binding.tvSubtitle.setOnClickListener { v: View? ->
             sec3Timer()
 //            mPlayer!!.pause()
+
+//            binding.tvSubtitle.startAnimation(setBlinkAnim())
             visibilityComponents(ConstraintLayout.GONE)
             AlertDialogPlayer(1003)
         }
@@ -1082,6 +1083,15 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         )
     }
 
+    private fun setBlinkAnim() : Animation {
+        val anim: Animation = AlphaAnimation(0.0f, 1.0f)
+        anim.duration = 100 //You can manage the blinking time with this parameter
+        anim.startOffset = 20
+//        anim.repeatMode = Animation.REVERSE
+//        anim.repeatCount = 1
+//        textView.startAnimation(anim)
+        return anim
+    }
     private fun getScreenBrightness() : Int {
         return  Settings.System.getInt(
             contentResolver,
