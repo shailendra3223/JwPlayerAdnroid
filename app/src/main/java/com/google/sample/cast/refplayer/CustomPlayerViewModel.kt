@@ -58,7 +58,8 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     override fun onTime(timeEvent: TimeEvent) {
         Log.d("TAG", "onTime ${timeEvent.duration} ${timeEvent.position}")
-        printTime.value = readTime(timeEvent.position)
+//        printTime.value = readTime(timeEvent.position)
+        printTime.value = readRemainingTime(timeEvent.position, timeEvent.duration)
         handleTimeUpdate(
             timeEvent.position,
             timeEvent.duration,
@@ -78,7 +79,32 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         val hours = if(hr.toString().length == 1) "0${hr}" else hr
         val minute = if(min.toString().length == 1) "0${min}" else min
         val second = if(sec.toString().length == 1) "0${sec}" else sec
-        return ("${hours}:${minute}:${second}")
+        return if (hr > 0) {
+            ("${hours}:${minute}:${second}")
+        } else {
+            ("${minute}:${second}")
+        }
+    }
+
+    private fun readRemainingTime(position: Double, duration: Double) : String {
+
+        val remainPos = duration-position
+        var min = remainPos.toInt() / 60
+        val sec = remainPos.toInt() % 60
+        var hr = 0
+        if (min >= 60) {
+            hr = min/60
+            min %= 60
+        }
+
+        val hours = if(hr.toString().length == 1) "0${hr}" else hr
+        val minute = if(min.toString().length == 1) "0${min}" else min
+        val second = if(sec.toString().length == 1) "0${sec}" else sec
+        return if (hr > 0) {
+            ("- ${hours}:${minute}:${second}")
+        } else {
+            ("- ${minute}:${second}")
+        }
     }
     /**
      * This assumes VOD content only. Does not account for Live and DVR scenarios

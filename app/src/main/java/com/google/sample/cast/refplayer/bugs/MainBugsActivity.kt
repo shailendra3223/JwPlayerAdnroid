@@ -3,6 +3,7 @@ package com.google.sample.cast.refplayer.bugs
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -78,7 +79,9 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     var seasonHashMap: HashMap<Int,Int> = HashMap()
 
     private var VAL_BRIGHTNESS = 0f
-    private var VAL_VOLUME = 0
+    private var VAL_VOLUME = 0f
+
+    private var audioManager: AudioManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +114,13 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                 Log.i(TAG, "onCreate: ${VAL_BRIGHTNESS}")
             }
         }
+
+        //Audio
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        binding.sliderVolume.valueFrom = 0f
+        binding.sliderVolume.valueTo = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
+        VAL_VOLUME = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+        binding.sliderVolume.value = VAL_VOLUME
 
         binding.mPlayerView.getPlayerAsync(this, this) { jwPlayer: JWPlayer? ->
             mPlayer = jwPlayer
@@ -186,6 +196,18 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             Log.i("TAGvv", "SeasonPos: ${i}")
         }
 
+//        val captionType  = CaptioningManager.CaptionStyle.EDGE_TYPE_DEPRESSED
+//        val captionsConfig = CaptionsConfig.Builder()
+//            .fontFamily("zapfino")
+//            .fontSize(12)
+//            .fontOpacity(100)
+//            .color("#FFFFFF")
+//            .edgeStyle(CaptionsConfig.CAPTION_EDGE_STYLE_RAISED)
+//            .windowColor("#000000")
+//            .windowOpacity(50)
+//            .backgroundColor("#000000")
+//            .backgroundOpacity(100)
+//            .build()
 
         var playerConfig = PlayerConfig.Builder()
             .playlist(playlist)
@@ -354,8 +376,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
 
                 if (mPlayer != null) {
-//                    mPlayer!!.play()
-                    mPlayer!!.playlistItem(positionEpisode)
+                    mPlayer!!.play()
+//                    mPlayer!!.playlistItem(positionEpisode)
 //                    Log.i(TAG, "onApplicationDisconnected: ${mPlayer!!.playlistItem(positionEpisode)}")
                 }
                 Log.i(TAG, "onApplicationDisconnected: ${mPlayer}")
@@ -395,6 +417,13 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
 //                val intent = Intent(this@MainBugsActivity, ExpandedControlsActivity::class.java)
 //                startActivity(intent)
+
+//                if (isAutoPlay) {
+//                    remoteMediaClient!!.play()
+//                    isAutoPlay = false
+//                }
+
+                Log.e(TAG, "onStatusUpdated getCurrentItemId9 " + (remoteMediaClient!!.mediaStatus) + " ***  getQueueItemCount *** " )
 
                 val mMediaStatus = remoteMediaClient!!.mediaStatus
 //                Log.w(TAG, "onStatusUpdated: remoteMediaClient $remoteMediaClient")
@@ -460,7 +489,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     ) {
 
         val cast = mPlayer!!.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
-        VAL_VOLUME = mPlayer!!.volume
 
         if (mCastSession != null && mCastSession!!.isConnected) {
             mPlayer!!.pause()
@@ -577,9 +605,11 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
 
         binding.sliderVolume.addOnChangeListener { slider, value, fromUser ->
-            Log.i(TAG, "bindSettingPan:sliderVolume ${value.toInt()}")
-            VAL_VOLUME = value.toInt()
-            mPlayer!!.volume = VAL_VOLUME
+            Log.i(TAG, "bindSettingPan:sliderVolumeopm1 ${audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC)}")
+            if (fromUser) {
+                VAL_VOLUME = value
+                audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, VAL_VOLUME.toInt(), 0)
+            }
         }
 
         binding.sliderBright.addOnChangeListener { slider, progress, fromUser ->
@@ -607,6 +637,35 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         //SeekBar
         customPlayerView.contentProgressPercentage.observe(this) { progress ->
             binding.seekbar.progress = progress
+            if (mCastContext!!.castState == CastState.CONNECTED) {
+                if (progress >= 100) {
+
+                    val next = mPlayer!!.playlistIndex + 1
+
+                    if (next != mPlayer!!.playlist.size) {
+                        positionEpisode = next
+                        if (mCastContext!!.castState == CastState.CONNECTED) {
+                            remoteMediaClient = getRemoteMediaClient()
+
+                            val customeData = JSONObject()
+                            try {
+                                customeData.put(CUSTOME_DATA, listChromcastEpisode[next])
+                            } catch (e: Exception) {
+                                Log.i(TAG, "queuePlay: exception $e")
+                            }
+
+//                            remoteMediaClient!!.queueNext(customeData)
+                            loadRemoteMedia(positionEpisode, true)
+                        }
+
+                        mPlayer!!.playlistItem(next)
+
+                    } else {
+                        Toast.makeText(this, "Your on Last Video", Toast.LENGTH_LONG).show()
+                    }
+
+                }
+            }
         }
 
         customPlayerView.isSeekbarVisible.observe(this) { isVisible ->
@@ -614,9 +673,9 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //            tvTime!!.visibility = if (isVisible) VISIBLE else GONE
 
             if (isVisible) {
-                visibilityComponents(ConstraintLayout.VISIBLE)
+                visibilityComponents(View.VISIBLE)
             } else {
-                visibilityComponents(ConstraintLayout.GONE)
+                visibilityComponents(View.GONE)
             }
         }
 
@@ -626,6 +685,12 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     customPlayerView.seek(progress)
+
+                    if (mCastContext!!.castState == CastState.CONNECTED) {
+                        if (progress >= 100) {
+                            mPlayer!!.next()
+                        }
+                    }
                 }
             }
 
@@ -822,20 +887,20 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                 list.add(SelectItem(0.0, null, null, item, !isSelect))
             }
 
-            if (mCastContext!!.castState == CastState.CONNECTED) {
-                var trackPos = 0L
-                if (mPositionSubTitle != 0) trackPos = 1
-
-                remoteMediaClient!!.setActiveMediaTracks(longArrayOf(trackPos))
-                    .setResultCallback(ResultCallback { mediaChannelResult: RemoteMediaClient.MediaChannelResult ->
-                        if (!mediaChannelResult.status.isSuccess) {
-                            Log.e(
-                                TAG,
-                                "Failed with status code:" + mediaChannelResult.status.statusCode
-                            )
-                        }
-                    })
-            }
+//            if (mCastContext!!.castState == CastState.CONNECTED) {
+//                var trackPos = 0L
+//                if (mPositionSubTitle != 0) trackPos = 1
+//
+//                remoteMediaClient!!.setActiveMediaTracks(longArrayOf(trackPos))
+//                    .setResultCallback(ResultCallback { mediaChannelResult: RemoteMediaClient.MediaChannelResult ->
+//                        if (!mediaChannelResult.status.isSuccess) {
+//                            Log.e(
+//                                TAG,
+//                                "Failed with status code:" + mediaChannelResult.status.statusCode
+//                            )
+//                        }
+//                    })
+//            }
         }
         return SelectAdapter(this, list, 1004, this)
     }
