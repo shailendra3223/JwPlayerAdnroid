@@ -63,6 +63,12 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
 
-    implementation 'com.google.android.gms:play-services-cast-framework:21.1.0'
+    implementation 'com.google.android.gms:play-services-cast-framework:21.2.0'
     implementation "androidx.mediarouter:mediarouter:1.3.1"
+
+    //Vertical
+    implementation "com.github.litekite:android-widgets:0.0.7"
+
+    //Ripple Effect
+    implementation "com.gauravbhola.ripplepulsebackground:library:1.0.0"
 }
