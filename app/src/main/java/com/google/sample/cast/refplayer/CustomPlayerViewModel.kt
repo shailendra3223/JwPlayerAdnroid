@@ -13,10 +13,10 @@ import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents.*
  */
 class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlayListener,
     OnPauseListener, OnCompleteListener, OnTimeListener, OnFullscreenListener,
-    OnReadyListener, OnDisplayClickListener {
+    OnReadyListener, OnDisplayClickListener, OnErrorListener , OnSetupErrorListener {
+
     // ADS
     var isAdPlaying = false
-        private set
     private val adProgressPercentage = MutableLiveData(NO_VALUE_POSITION)
     private var currentSkipOffset = NO_VALUE_POSITION
     private val skipOffsetCountdown = MutableLiveData(NO_VALUE_STRING)
@@ -29,9 +29,11 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     val isPlayIcon = MutableLiveData(false)
     val isSeekbarVisible = MutableLiveData(false)
     val isFullscreen = MutableLiveData(false)
-    val contentProgressPercentage = MutableLiveData(NO_VALUE_POSITION)
+    val contentProgressPercentage = MutableLiveData(NO_VALUE_POSITION_PLAY)
 
     val isFirstFrame = MutableLiveData<JWPlayer>()
+    val isError = MutableLiveData<ErrorEvent>()
+    val isSetupError = MutableLiveData<SetupErrorEvent>()
     val isVisibility = MutableLiveData(true)
     val disableTouch = MutableLiveData(false)
     val printTime = MutableLiveData("")
@@ -112,17 +114,19 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     fun handleTimeUpdate(
         position: Double,
         duration: Double,
-        percentageLD: MutableLiveData<Int>
+        percentageLD: MutableLiveData<Float>
     ) {
+        Log.i("TAG", "handleTimeUpdate:onTime ${calculateProgressPercentage(position, duration)}")
         val currentPercentage = calculateProgressPercentage(position, duration)
         val lastPercentage = percentageLD.value!!
+        Log.i("TAG", "handleTimeUpdate:onTime ${lastPercentage} ${percentageLD.value}")
         if (currentPercentage != lastPercentage) {
             percentageLD.value = currentPercentage
         }
     }
 
-    private fun calculateProgressPercentage(position: Double, duration: Double): Int {
-        return (position * 100 / duration).toInt()
+    private fun calculateProgressPercentage(position: Double, duration: Double): Float {
+        return (position * 100 / duration).toFloat()
     }
 
     override fun onFullscreen(fullscreenEvent: FullscreenEvent) {
@@ -221,7 +225,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         return isFullscreen
     }
 
-    fun getContentProgressPercentage(): LiveData<Int> {
+    fun getContentProgressPercentage(): LiveData<Float> {
         return contentProgressPercentage
     }
 
@@ -232,6 +236,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     companion object {
         private const val NO_VALUE_POSITION = -1
+        private const val NO_VALUE_POSITION_PLAY = 0.0f
         private const val NO_VALUE_STRING = ""
     }
 
@@ -244,11 +249,21 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         player.addListener(EventType.FULLSCREEN, this)
         player.addListener(EventType.DISPLAY_CLICK, this)
         player.addListener(EventType.READY, this)
+        player.addListener(EventType.SETUP_ERROR, this)
+        player.addListener(EventType.ERROR, this)
     }
 
     override fun onDisplayClick(click: DisplayClickEvent) {
 //        if (!disableTouch.value!!) {
             isVisibility.value = !isVisibility.value!!
 //        }
+    }
+
+    override fun onError(errorEvent: ErrorEvent?) {
+        isError.value = errorEvent
+    }
+
+    override fun onSetupError(setupErrorEvent: SetupErrorEvent?) {
+        isSetupError.value = setupErrorEvent
     }
 }

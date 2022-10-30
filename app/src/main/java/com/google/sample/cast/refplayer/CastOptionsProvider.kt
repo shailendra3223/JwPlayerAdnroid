@@ -1,6 +1,7 @@
 package com.google.sample.cast.refplayer
 
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.cast.CastMediaControlIntent
 import com.google.android.gms.cast.LaunchOptions
 import com.google.android.gms.cast.MediaMetadata
@@ -57,8 +58,9 @@ class CastOptionsProvider : OptionsProvider {
     }
 
     private class ImagePickerImpl : ImagePicker() {
-        override fun onPickImage(mediaMetadata: MediaMetadata, hints: ImageHints): WebImage? {
+        override fun onPickImage(mediaMetadata: MediaMetadata?, hints: ImageHints): WebImage? {
             val type = hints.type
+            Log.i("TAG", "onPickImagkle: ${type}")
             if (mediaMetadata == null || !mediaMetadata.hasImages()) {
                 return null
             }

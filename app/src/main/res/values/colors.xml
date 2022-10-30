@@ -12,6 +12,7 @@
     <color name="white25">#40FFFFFF</color>
     <color name="tint">#80191919</color>
     <color name="transparent">#00000000</color>
+    <color name="transparent1">#03000000</color>
     <color name="transparent10">#1A000000</color>
     <color name="transparent25">#40000000</color>
     <color name="transparent50">#80000000</color>

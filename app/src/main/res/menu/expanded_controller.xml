@@ -17,17 +17,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/media_route_menu_item"
-        android:orderInCategory="101"
-        android:title="@string/media_route_menu_title"
-        android:visible="true"
-        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
-        app:showAsAction="always" />
-
-    <item
         android:id="@+id/aspect_ratio_menu"
         android:icon="@drawable/ic_full_screen"
         android:title="Aspect Ratio"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/cast_menu"
+        android:icon="@drawable/logo_j"
+        android:title="Casting"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/media_route_menu_item"
+        android:orderInCategory="101"
+        android:title="@string/media_route_menu_title"
+        android:icon="@drawable/ic_jw_cast_off"
+        android:visible="true"
+        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
         app:showAsAction="always" />
 
 </menu>

@@ -326,7 +326,7 @@ class VideoActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenListene
 
         //SeekBar
         customPlayerView!!.contentProgressPercentage.observe(this) { progress ->
-            binding!!.seekbar.progress = progress
+            binding!!.seekbar.progress = progress.toInt()
         }
 
         customPlayerView!!.isSeekbarVisible.observe(this) { isVisible ->

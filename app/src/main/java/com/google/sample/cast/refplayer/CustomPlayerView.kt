@@ -156,16 +156,16 @@ class CustomPlayerView(
 
         if (halfHeightDp < 140) {
             halfHeightDp -= 15
-            marginTop = (halfHeightDp/2).toInt() - 15
+            marginTop = (halfHeightDp/2) - 15
         } else {
-            marginTop = (halfHeightDp/2).toInt()
+            marginTop = (halfHeightDp/2)
         }
 
         if (marginTop <= 0) {
-            marginTop = (halfHeightDp / 2).toInt()
+            marginTop = (halfHeightDp / 2)
         }
 
-        Log.i(TAG, "onZoomUpdate5x: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop} ")
+        Log.i(TAG, "onZoomUpdate5x: ${widthDp}  ${heightDp} ${halfHeightDp}  ${marginTop}")
 
         mCastContext = castContext
         mCastContext!!.addCastStateListener(this)
@@ -283,7 +283,7 @@ class CustomPlayerView(
 
         //SeekBar
         customPlayerView.contentProgressPercentage.observe(lifecycleOwner) { progress ->
-            contentSeekBar!!.progress = progress
+            contentSeekBar!!.progress = progress.toInt()
         }
 
         customPlayerView.isSeekbarVisible.observe(lifecycleOwner) { isVisible ->
