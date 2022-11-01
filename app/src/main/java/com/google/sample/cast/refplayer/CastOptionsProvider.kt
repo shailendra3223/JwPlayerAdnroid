@@ -60,11 +60,11 @@ class CastOptionsProvider : OptionsProvider {
     private class ImagePickerImpl : ImagePicker() {
         override fun onPickImage(mediaMetadata: MediaMetadata?, hints: ImageHints): WebImage? {
             val type = hints.type
-            Log.i("TAG", "onPickImagkle: ${type}")
             if (mediaMetadata == null || !mediaMetadata.hasImages()) {
                 return null
             }
             val images = mediaMetadata.images
+            Log.i("TAG", "onPickImagkle: ${type} ${images.size} ${images}")
             return if (images.size == 1) {
                 images[0]
             } else {

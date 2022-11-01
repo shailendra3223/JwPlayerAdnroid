@@ -63,15 +63,12 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
     private var mPlayer: JWPlayer? = null
 
-    private val GOOGLE_PLAY_STORE_PACKAGE_NAME_OLD = "com.google.market"
-    private val GOOGLE_PLAY_STORE_PACKAGE_NAME_NEW = "com.android.vending"
     private val TAG = "MainActivity::Class"
 
     private var mSessionManagerListener: SessionManagerListener<CastSession>? = null
     private var mCastContext: CastContext? = null
     private var mCastSession: CastSession? = null
 
-    //    var mMediaInfo: MediaInfo? = null
     var remoteMediaClient: RemoteMediaClient? = null
     var EXTRA_DATA: String? = "EXTRA_DATA"
     var CUSTOME_DATA: String? = "CUSTOME_DATA"
@@ -79,10 +76,9 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     private var listChromcastEpisode = ArrayList<MediaQueueItem>()
     private var listChromcastMediaInfo = ArrayList<MediaInfo>()
 
-    var seasonHashMap: HashMap<Int,Int> = HashMap()
+    var seasonHashMap: HashMap<Int, Int> = HashMap()
 
     private var VAL_BRIGHTNESS = 0f
-    private var VAL_VOLUME = 0f
 
     private var audioManager: AudioManager? = null
     lateinit var mCast: CastingMenuViewModel
@@ -106,7 +102,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //        mCastContext = CastContext.getSharedInstance(this, Executors.newSingleThreadExecutor()).result as CastContext
         mCastContext = CastContext.getSharedInstance(this)
 
-//
 //        CastContext.getSharedInstance(this, Executors.newSingleThreadExecutor())
 //            .addOnSuccessListener { castContext: CastContext? -> }
 //            .addOnFailureListener { exception: java.lang.Exception? -> }
@@ -129,7 +124,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         //Audio
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         binding.sliderVolume.valueFrom = 0f
-        binding.sliderVolume.valueTo = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
+        binding.sliderVolume.valueTo =
+            audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
         binding.sliderVolume.value = getVolume()
         audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, getVolume().toInt(), 0)
 
@@ -160,7 +156,7 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     var positionSeason = 0
     var positionEpisode = 0
     private fun setupPlayer1() {
-        // Handle hiding/showing of ActionBar
+
         mPlayer!!.addListener(EventType.FULLSCREEN, this)
         mCast = mPlayer!!.getViewModelForUiGroup(UiGroup.CASTING_MENU) as CastingMenuViewModel
         // Keep the screen on during playback
@@ -175,7 +171,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         for ((i, season) in data[0].seasons.withIndex()) {
             seasonHashMap[i] = season.episodes.size
             for (episode in data[0].seasons[i].episodes) {
-                Log.i("TAGvv", "setupPlayer1: ${episode.media}")
 
                 val caption1 = Caption.Builder()
                     .file("")
@@ -240,7 +235,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             .build()
 
         mPlayer!!.setup(playerConfig)
-
         mPlayer!!.setFullscreen(true, true)
 
 
@@ -262,22 +256,11 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
              .setMetadata(movieMetadata)
              .setStreamDuration((mPlayer!!.duration * 1000).toLong())
              .build()*/
-
     }
-
 
 
     override fun onFullscreen(fullscreenEvent: FullscreenEvent) {
         val actionBar = supportActionBar
-        /* if (actionBar != null) {
- //            val isCasting = if (mCastContext != null) mCastContext!!
- //                .castState == CastState.CONNECTED else false
-             if (fullscreenEvent.fullscreen) {
-                 actionBar!!.hide()
-             } else {
-                 actionBar.show()
-             }
-         }*/
     }
 
 
@@ -346,10 +329,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                 if (mCastSession != null) {
                     if (mCastSession!!.isConnected) {
                         Log.i(TAG, "bindSettingPan1: ${mCastSession!!.castDevice!!.friendlyName}")
-                        Log.i(
-                            TAG,
-                            "bindSettingPan: ${mCastContext!!.sessionManager.currentSession!!.isConnected}"
-                        )
                         AalertDialogDisconnectCast(mCast, mCastSession!!)
                     } else {
 
@@ -364,7 +343,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                 } else {
                     mCastContext = CastContext.getSharedInstance(this)
 //                    CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton!!)
-//                    mCastContext!!.addCastStateListener(this)
 //                    mCastContext!!.addAppVisibilityListener(this)
                     mCastSession = mCastContext!!.sessionManager.currentCastSession
 
@@ -409,14 +387,23 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
                     mPlayer!!.pause()
                 }
             }
-            override fun onSessionEnding(session: CastSession) {Log.i(TAG, "onSessionEnding")}
-            override fun onSessionResuming(session: CastSession, sessionId: String) {Log.i(TAG, "onSessionResuming")}
-            override fun onSessionSuspended(session: CastSession, reason: Int) {Log.i(TAG, "onSessionSuspended")}
+
+            override fun onSessionEnding(session: CastSession) {
+                Log.i(TAG, "onSessionEnding")
+            }
+
+            override fun onSessionResuming(session: CastSession, sessionId: String) {
+                Log.i(TAG, "onSessionResuming")
+            }
+
+            override fun onSessionSuspended(session: CastSession, reason: Int) {
+                Log.i(TAG, "onSessionSuspended")
+            }
+
             private fun onApplicationConnected(castSession: CastSession) {
                 Log.i(TAG, "onSessionConnected")
                 mCastSession = castSession
 //                if (null != mMediaInfo) {
-
 //                    if (mPlaybackState == PlaybackState.PLAYING) {
 //                        mVideoView.pause()
                 loadRemoteMedia(positionEpisode, true) //mSeekbar.getProgress()
@@ -432,12 +419,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             }
 
             private fun onApplicationDisconnected() {
-//                updatePlaybackLocation(LOCAL)
-//                mPlaybackState = PlaybackState.IDLE
-//                mLocation = LOCAL
-//                updatePlayButton(mPlaybackState)
-
-
                 if (mPlayer != null) {
                     mPlayer!!.play()
 //                    mPlayer!!.playlistItem(positionEpisode)
@@ -465,6 +446,10 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         }
 
 //        remoteMediaClient!!.load(listChromcastMediaInfo[position])
+
+        Log.i(TAG, "METADTA901 ${listChromcastEpisode[position].media!!.metadata!!.images}")
+
+
         remoteMediaClient!!.queueLoad(
             listChromcastEpisode.toTypedArray(),
             position,
@@ -472,22 +457,9 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             customeData
         )
 
-        Log.i(TAG, "listChromcastEpisode: ${positionEpisode} ${listChromcastEpisode[positionEpisode].itemId}")
-
 
         remoteMediaClient!!.registerCallback(object : RemoteMediaClient.Callback() {
             override fun onStatusUpdated() {
-
-//                val intent = Intent(this@MainBugsActivity, ExpandedControlsActivity::class.java)
-//                startActivity(intent)
-
-//                if (isAutoPlay) {
-//                    remoteMediaClient!!.play()
-//                    isAutoPlay = false
-//                }
-
-                Log.e(TAG, "onStatusUpdated getCurrentItemId9 " + (remoteMediaClient!!.mediaStatus) + " ***  getQueueItemCount *** " )
-
                 val mMediaStatus = remoteMediaClient!!.mediaStatus
 //                Log.w(TAG, "onStatusUpdated: remoteMediaClient $remoteMediaClient")
                 if (mMediaStatus != null && mMediaStatus.queueItems != null) {
@@ -497,8 +469,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //                        updateCastList(false)
 //                        queueItemPlayedPosition++
 //                    }
-
-                    Log.e(TAG, "onStatusUpdated getCurrentItemId " + (remoteMediaClient!!.mediaStatus?.currentItemId) + " ***  getQueueItemCount *** " + mMediaStatus!!.queueItemCount)
                 }
 
 //                remoteMediaClient!!.unregisterCallback(this)
@@ -507,7 +477,7 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
     }
 
 
-    fun loadVideo(mEpisode: Episode, mPlayer : JWPlayer) {
+    fun loadVideo(mEpisode: Episode, mPlayer: JWPlayer) {
         remoteMediaClient = mCastSession!!.remoteMediaClient
         val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
         movieMetadata.putString(MediaMetadata.KEY_TITLE, mEpisode.title)
@@ -530,23 +500,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
     override fun onPause() {
         super.onPause()
-        Log.d(TAG, "onPause() was called")
-//        if (mLocation == LOCAL) {
-//            if (mSeekbarTimer != null) {
-//                mSeekbarTimer.cancel()
-//                mSeekbarTimer = null
-//            }
-//            if (mControllersTimer != null) {
-//                mControllersTimer.cancel()
-//            }
-//            // since we are playing locally, we need to stop the playback of
-//            // video (if user is not watching, pause it!)
-//            mVideoView.pause()
-//            mPlaybackState = PlaybackState.PAUSED
-//            updatePlayButton(PlaybackState.PAUSED)
-//        }
-
-
         if (mPlayer != null && mPlayer!!.state == PlayerState.PLAYING) {
             mPlayer!!.pause()
         }
@@ -575,9 +528,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         playerConfig: PlayerConfig,
         data: ModelClass
     ) {
-
-//        Log.i(TAG, "bindSettingPanjn: ${mCastSession}  ${ mCastSession!!.isConnected}")
-
         if (mCastSession != null && mCastSession!!.isConnected) {
             mPlayer!!.pause()
         }
@@ -623,7 +573,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         binding.tvSubtitle.setOnClickListener { v: View? ->
             sec3Timer()
 //            mPlayer!!.pause()
-
 //            binding.tvSubtitle.startAnimation(setBlinkAnim())
             visibilityComponents(ConstraintLayout.GONE)
             AlertDialogPlayer(1003)
@@ -754,7 +703,10 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
 
         binding.sliderVolume.addOnChangeListener { slider, value, fromUser ->
-            Log.i(TAG, "bindSettingPan:sliderVolumeopm1 ${audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC)}")
+            Log.i(
+                TAG,
+                "bindSettingPan:sliderVolumeopm1 ${audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC)}"
+            )
             if (fromUser) {
                 audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, value.toInt(), 0)
             }
@@ -781,32 +733,27 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             Log.i(TAG, "bindSettingPan2: ${progress}")
         }
 
-
         //SeekBar
-        var prevProgress = 0f
-        var curProgress = 0f
         customPlayerView.contentProgressPercentage.observe(this) { progress ->
             binding.seekbar.progress = progress.toInt()
-            if (mCastContext!!.castState == CastState.CONNECTED) {
-                Log.i(TAG, "bindSettingPanjn: ${progress}")
-                curProgress = progress
-                if (progress >= 99) {
-                    val next = mPlayer!!.playlistIndex + 1
-                    if (next != mPlayer!!.playlist.size) {
-                        positionEpisode = next
-                        if (mCastContext!!.castState == CastState.CONNECTED) {
-                            remoteMediaClient = getRemoteMediaClient()
-                            loadRemoteMedia(positionEpisode, true)
-                        }
-                        mPlayer!!.playlistItem(positionEpisode)
-                        mPositionSubTitle = 0
-                    } else {
-                        Toast.makeText(this, "Your on Last Video", Toast.LENGTH_LONG).show()
-                    }
-
-                }
-                prevProgress = curProgress
-            }
+            Log.i(TAG, "bindSettingPanjn:progress ${progress}")
+//            if (mCastContext!!.castState == CastState.CONNECTED) {
+//                Log.i(TAG, "bindSettingPanjn: ${progress}")
+//                if (progress >= 99) {
+//                    val next = mPlayer!!.playlistIndex + 1
+//                    if (next != mPlayer!!.playlist.size) {
+//                        positionEpisode = next
+//                        if (mCastContext!!.castState == CastState.CONNECTED) {
+//                            remoteMediaClient = getRemoteMediaClient()
+//                            loadRemoteMedia(positionEpisode, true)
+//                        }
+//                        mPlayer!!.playlistItem(positionEpisode)
+//                        mPositionSubTitle = 0
+//                    } else {
+//                        Toast.makeText(this, "Your on Last Video", Toast.LENGTH_LONG).show()
+//                    }
+//                }
+//            }
         }
 
         customPlayerView.isSeekbarVisible.observe(this) { isVisible ->
@@ -820,31 +767,15 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             }
         }
 
-
-
+        var isSeek = 0
+        var isSeekTouch = false
         binding.seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                isSeekTouch = fromUser
                 if (fromUser) {
+                    Log.i(TAG, "bindSettingPanjn:seekbar ${progress}")
+                    isSeek = progress
                     customPlayerView.seek(progress)
-
-//                    if (mCastContext!!.castState == CastState.CONNECTED) {
-//                        if (progress >= 100) {
-//                            val next = mPlayer!!.playlistIndex + 1
-//
-//                            if (next != mPlayer!!.playlist.size) {
-//                                positionEpisode = next
-//                                if (mCastContext!!.castState == CastState.CONNECTED) {
-//                                    remoteMediaClient = getRemoteMediaClient()
-//                                    loadRemoteMedia(positionEpisode, true)
-//                                }
-//
-//                                mPlayer!!.playlistItem(next)
-//
-//                            } else {
-//                                Toast.makeText(this@MainBugsActivity, "Your on Last Video", Toast.LENGTH_LONG).show()
-//                            }
-//                        }
-//                    }
                 }
             }
 
@@ -852,9 +783,31 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
 
+
+        customPlayerView.isLastFrame.observe(this) {
+            Log.i(TAG, "bindSettingPanjn:it ${it}")
+            Log.i(TAG, "bindSettingPanjn:it ${isSeekTouch} ${isSeek}")
+
+            if (mCastContext!!.castState == CastState.CONNECTED && (it < 0.1 || isSeek >= 100)) {
+                mPlayer!!.pause()
+                val next = mPlayer!!.playlistIndex + 1
+                if (next != mPlayer!!.playlist.size) {
+                    positionEpisode = next
+                    if (mCastContext!!.castState == CastState.CONNECTED) {
+                        remoteMediaClient = getRemoteMediaClient()
+                        loadRemoteMedia(positionEpisode, true)
+                    }
+                    mPlayer!!.playlistItem(positionEpisode)
+                    mPositionSubTitle = 0
+                } else {
+                    Toast.makeText(this, "Your on Last Video", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         customPlayerView.isPlayToggleVisible.observe(this) { isVisible ->
             binding.playPauseToggle.visibility =
-                if (isVisible) ConstraintLayout.VISIBLE else ConstraintLayout.GONE
+                if (isVisible) View.VISIBLE else View.GONE
         }
         customPlayerView.isPlayIcon.observe(this) { isPlay ->
             binding.playPauseToggle.setImageDrawable(
@@ -1117,8 +1070,8 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
                                 var allEpisode = 0
                                 for (map in seasonHashMap.entries) {
-                                   if (map.key  != position) allEpisode += map.value
-                                   else break
+                                    if (map.key != position) allEpisode += map.value
+                                    else break
                                 }
 
 
@@ -1157,7 +1110,10 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
                                 if (mCastContext!!.castState == CastState.CONNECTED) {
                                     remoteMediaClient = getRemoteMediaClient()
-                                    Log.i(TAG, "bindSettingPan: ${listChromcastEpisode[positionEpisode].itemId} ${remoteMediaClient} ${positionEpisode}")
+                                    Log.i(
+                                        TAG,
+                                        "bindSettingPan: ${listChromcastEpisode[positionEpisode].itemId} ${remoteMediaClient} ${positionEpisode}"
+                                    )
 
                                     loadRemoteMedia(positionEpisode, true)
                                 }
@@ -1201,7 +1157,6 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
             try {
                 extraData.put(EXTRA_DATA, item)
-
             } catch (e: Exception) {
                 Log.i(TAG, "queuePlay: exception $e")
             }
@@ -1240,9 +1195,12 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
             queueList.add(MediaQueueItem.Builder(mMediaInfo).setAutoplay(true).build())
             listChromcastMediaInfo.add(mMediaInfo)
+//            Log.i(TAG, "METADTA90 ${listChromcastEpisode[0].media!!.metadata!!.images}")
         }
 
         listChromcastEpisode.addAll(queueList)
+        Log.i(TAG, "METADTA90 ${listChromcastEpisode[0].media!!.metadata!!.images}")
+
         remoteMediaClient = mCastSession?.remoteMediaClient ?: return
 
         val customeData = JSONObject()
@@ -1295,7 +1253,7 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
         )
     }
 
-    private fun setBlinkAnim() : Animation {
+    private fun setBlinkAnim(): Animation {
         val anim: Animation = AlphaAnimation(0.0f, 1.0f)
         anim.duration = 100 //You can manage the blinking time with this parameter
         anim.startOffset = 20
@@ -1304,13 +1262,15 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 //        textView.startAnimation(anim)
         return anim
     }
-    private fun getScreenBrightness() : Int {
-        return  Settings.System.getInt(
+
+    private fun getScreenBrightness(): Int {
+        return Settings.System.getInt(
             contentResolver,
-            Settings.System.SCREEN_BRIGHTNESS)
+            Settings.System.SCREEN_BRIGHTNESS
+        )
     }
 
-    private fun getVolume() : Float  {
+    private fun getVolume(): Float {
         return audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
     }
 
@@ -1388,28 +1348,28 @@ class MainBugsActivity : AppCompatActivity(), VideoPlayerEvents.OnFullscreenList
 
     override fun onDoubleClick(v: View?, customPlayerView: CustomPlayerViewModel) {
 
-        when (v!!.id){
-             R.id.ll_backward_15_ripple -> {
-                 binding.rplBackward.startRippleAnimation()
-                 sec3Timer()
-                 val position = mPlayer!!.position - 15
-                 if (position > 16) {
-                     mPlayer!!.seek(position)
-                     customPlayerView.handleTimeUpdate(
-                         position,
-                         mPlayer!!.duration,
-                         customPlayerView.contentProgressPercentage
-                     )
-                 } else {
-                     mPlayer!!.seek(0.1)
-                     customPlayerView.handleTimeUpdate(
-                         0.1,
-                         mPlayer!!.duration,
-                         customPlayerView.contentProgressPercentage
-                     )
-                 }
-                 binding.rplBackward.stopRippleAnimation();
-             }
+        when (v!!.id) {
+            R.id.ll_backward_15_ripple -> {
+                binding.rplBackward.startRippleAnimation()
+                sec3Timer()
+                val position = mPlayer!!.position - 15
+                if (position > 16) {
+                    mPlayer!!.seek(position)
+                    customPlayerView.handleTimeUpdate(
+                        position,
+                        mPlayer!!.duration,
+                        customPlayerView.contentProgressPercentage
+                    )
+                } else {
+                    mPlayer!!.seek(0.1)
+                    customPlayerView.handleTimeUpdate(
+                        0.1,
+                        mPlayer!!.duration,
+                        customPlayerView.contentProgressPercentage
+                    )
+                }
+                binding.rplBackward.stopRippleAnimation();
+            }
         }
     }
 

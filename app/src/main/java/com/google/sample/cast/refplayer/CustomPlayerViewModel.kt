@@ -13,7 +13,7 @@ import com.jwplayer.pub.api.events.listeners.VideoPlayerEvents.*
  */
 class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlayListener,
     OnPauseListener, OnCompleteListener, OnTimeListener, OnFullscreenListener,
-    OnReadyListener, OnDisplayClickListener, OnErrorListener , OnSetupErrorListener {
+    OnReadyListener, OnDisplayClickListener, OnErrorListener , OnSetupErrorListener, OnCaptionsChangedListener {
 
     // ADS
     var isAdPlaying = false
@@ -32,6 +32,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     val contentProgressPercentage = MutableLiveData(NO_VALUE_POSITION_PLAY)
 
     val isFirstFrame = MutableLiveData<JWPlayer>()
+    val isLastFrame = MutableLiveData<Double>()
     val isError = MutableLiveData<ErrorEvent>()
     val isSetupError = MutableLiveData<SetupErrorEvent>()
     val isVisibility = MutableLiveData(true)
@@ -91,6 +92,11 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     private fun readRemainingTime(position: Double, duration: Double) : String {
 
         val remainPos = duration-position
+//        if (remainPos < 0.1) { //Last Frame
+//            Log.i("TAGssj", "readRemainingTime: ${remainPos}")
+//        }
+        isLastFrame.value = remainPos
+
         var min = remainPos.toInt() / 60
         val sec = remainPos.toInt() % 60
         var hr = 0
@@ -251,6 +257,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         player.addListener(EventType.READY, this)
         player.addListener(EventType.SETUP_ERROR, this)
         player.addListener(EventType.ERROR, this)
+        player.addListener(EventType.CAPTIONS_CHANGED, this)
     }
 
     override fun onDisplayClick(click: DisplayClickEvent) {
@@ -265,5 +272,11 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     override fun onSetupError(setupErrorEvent: SetupErrorEvent?) {
         isSetupError.value = setupErrorEvent
+    }
+
+    override fun onCaptionsChanged(caption: CaptionsChangedEvent?) {
+//        TODO("Not yet implemented")
+        Log.i("TAG", "onCaptionsChanged1: ${caption!!.currentTrack.times(0)}")
+        Log.i("TAG", "onCaptionsChanged2: ${caption!!.currentTrack}")
     }
 }
