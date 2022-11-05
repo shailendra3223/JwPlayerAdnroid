@@ -183,8 +183,8 @@ class CustomPlayerView(
 
         if (mCastSession!=null && mCastSession!!.isConnected) {
             customPlayerView.player.pause()
-            val intent = Intent(context, ExpandedControlsActivity::class.java)
-            context.startActivity(intent)
+//            val intent = Intent(context, ExpandedControlsActivity::class.java)
+//            context.startActivity(intent)
         }
 
         val mEpisode = data[0].seasons[positionSeason].episodes[positionEpisode]
@@ -323,8 +323,8 @@ class CustomPlayerView(
 
             if (mCastSession!=null && mCastSession!!.isConnected) {
                 Log.w(TAG, "Connected to a cast device")
-                val intent = Intent(context, ExpandedControlsActivity::class.java)
-                context.startActivity(intent)
+//                val intent = Intent(context, ExpandedControlsActivity::class.java)
+//                context.startActivity(intent)
             } else {
                 customPlayerView.togglePlay()
             }

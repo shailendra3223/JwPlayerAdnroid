@@ -22,11 +22,11 @@
         android:title="Aspect Ratio"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/cast_menu"
-        android:icon="@drawable/logo_j"
-        android:title="Casting"
-        app:showAsAction="always" />
+<!--    <item-->
+<!--        android:id="@+id/cast_menu"-->
+<!--        android:icon="@drawable/logo_j"-->
+<!--        android:title="Casting"-->
+<!--        app:showAsAction="always" />-->
 
     <item
         android:id="@+id/media_route_menu_item"
