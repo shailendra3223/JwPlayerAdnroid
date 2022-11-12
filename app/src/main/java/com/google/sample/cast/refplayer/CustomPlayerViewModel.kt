@@ -37,6 +37,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     val isSetupError = MutableLiveData<SetupErrorEvent>()
     val isVisibility = MutableLiveData(true)
     val disableTouch = MutableLiveData(false)
+    val isRippleVisibility = MutableLiveData(false)
     val printTime = MutableLiveData("")
 
     override fun onReady(readyEvent: ReadyEvent) {
@@ -50,12 +51,15 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     override fun onPlay(playEvent: PlayEvent) {
-        Log.d("TAG", "onPlay")
-        updateContentUi()
+        Log.d("MainActivity::Class", "onPlay")
+        if (isRippleVisibility.value == false) {
+            updateContentUi()
+        }
+        isRippleVisibility.value = false
     }
 
     override fun onPause(pauseEvent: PauseEvent) {
-        Log.d("TAG", "onPause")
+        Log.i("MainActivity::Class", "onPause: ")
         updateContentUi()
     }
 
@@ -63,11 +67,20 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
         Log.d("TAG", "onTime ${timeEvent.duration} ${timeEvent.position}")
 //        printTime.value = readTime(timeEvent.position)
         printTime.value = readRemainingTime(timeEvent.position, timeEvent.duration)
-        handleTimeUpdate(
-            timeEvent.position,
-            timeEvent.duration,
-            contentProgressPercentage
-        )
+        if (timeEvent.position >= 0) {
+            handleTimeUpdate(
+                timeEvent.position,
+                timeEvent.duration,
+                contentProgressPercentage
+            )
+        } else {
+            player.seek(1.0)
+            handleTimeUpdate(
+                1.0,
+                timeEvent.duration,
+                contentProgressPercentage
+            )
+        }
     }
 
     private fun readTime(position: Double) : String {
@@ -95,7 +108,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 //        if (remainPos < 0.1) { //Last Frame
 //            Log.i("TAGssj", "readRemainingTime: ${remainPos}")
 //        }
-        isLastFrame.value = remainPos
+//        isLastFrame.value = remainPos
 
         var min = remainPos.toInt() / 60
         val sec = remainPos.toInt() % 60
@@ -151,6 +164,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     private fun updateContentUi() {
+        Log.i("MainActivity::Class", "updateContentUi: ")
         isPlayToggleVisible.value = shouldPlayToggleBeVisible()
         isPlayIcon.value = shouldPlayIconBeVisible()
         isSeekbarVisible.value = shouldSeekbarBeVisible()
@@ -190,6 +204,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     fun togglePlay() {
+        isRippleVisibility.value = false
         if (player.state != PlayerState.PLAYING) {
             player.play()
         } else {
@@ -236,9 +251,10 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
     }
 
     override fun onComplete(completeEvent: CompleteEvent) {
-        Log.d("TAGSS", "onComplete")
+        Log.d("MainActivity::Class", "onComplete")
         updateContentUi()
     }
+
 
     companion object {
         private const val NO_VALUE_POSITION = -1
@@ -262,6 +278,7 @@ class CustomPlayerViewModel(val player: JWPlayer) : OnFirstFrameListener, OnPlay
 
     override fun onDisplayClick(click: DisplayClickEvent) {
 //        if (!disableTouch.value!!) {
+        Log.i("MainActivity::Class", "onDisplayClick: ")
             isVisibility.value = !isVisibility.value!!
 //        }
     }

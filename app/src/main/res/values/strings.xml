@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JwPlayer</string>
     <string name="video_setting">Video Setting</string>
     <string name="episodes">Episodes</string>
@@ -16,4 +16,15 @@
     <string name="app_id">C0868879</string>
     <string name="app_id1">4F8B3483</string>
     <string name="app_id2">CC1AD845</string>
+
+    <array name="cast_control_buttons">
+        <item>@id/cast_button_type_empty</item>
+        <item>@id/cast_button_type_rewind_30_seconds</item>
+        <item>@id/cast_button_type_forward_30_seconds</item>
+        <item>@id/cast_button_type_mute_toggle</item>
+        <item>@id/cast_button_type_closed_caption</item>
+        <item>@id/cast_button_type_skip_previous</item>
+        <item>@id/cast_button_type_skip_next</item>
+        <item>@id/cast_seek_bar</item>
+    </array>
 </resources>

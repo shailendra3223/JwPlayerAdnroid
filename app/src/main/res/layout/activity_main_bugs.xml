@@ -46,21 +46,22 @@
 
             <com.gauravbhola.ripplepulsebackground.RipplePulseLayout
                 android:id="@+id/rpl_backward"
-                android:layout_width="0dp"
+                android:layout_width="400dp"
                 android:layout_height="match_parent"
                 android:clipChildren="false"
-                android:visibility="gone"
+                android:visibility="visible"
+                android:layout_marginBottom="60dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/play_pause_toggle"
+                app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                ripple:duration="500"
-                ripple:endRadius="300dp"
+                ripple:duration="600"
+                ripple:endRadius="200dp"
                 ripple:rippleColor="#fff"
                 ripple:rippleType="fill"
-                ripple:startRadius="42dp">
+                ripple:startRadius="100dp">
 
-                <androidx.appcompat.widget.LinearLayoutCompat
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/ll_backward_15_ripple"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -71,11 +72,54 @@
                         android:id="@+id/iv_backward_15_ripple"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:layout_marginBottom="30dp"
-                        android:src="@drawable/ic_rewind_15" />
+                        android:layout_marginEnd="80dp"
+                        android:src="@drawable/ic_rewind_15"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
+            </com.gauravbhola.ripplepulsebackground.RipplePulseLayout>
+
+
+            <com.gauravbhola.ripplepulsebackground.RipplePulseLayout
+                android:id="@+id/rpl_forward"
+                android:layout_width="400dp"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:visibility="visible"
+                android:layout_marginBottom="60dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                ripple:duration="600"
+                ripple:endRadius="200dp"
+                ripple:rippleColor="#fff"
+                ripple:rippleType="fill"
+                ripple:startRadius="100dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ll_forward_15_ripple"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/iv_forward_15_ripple"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="80dp"
+                        android:visibility="gone"
+                        android:src="@drawable/ic_fast_forward_15"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.gauravbhola.ripplepulsebackground.RipplePulseLayout>
 

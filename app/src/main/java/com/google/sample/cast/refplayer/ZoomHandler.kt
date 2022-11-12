@@ -1,6 +1,5 @@
 package com.google.sample.cast.refplayer
 
-import android.util.Log
 import android.view.ViewGroup
 import com.jwplayer.pub.api.fullscreen.FullscreenHandler
 import com.jwplayer.pub.view.JWPlayerView
@@ -11,14 +10,10 @@ open class ZoomHandler(var mPlayerView: JWPlayerView) : FullscreenHandler {
     var mFullscreenParams: ViewGroup.LayoutParams? = null
 
     override fun onFullscreenRequested() {
-
-        Log.i("TAG", "gIOKLL1 onFullscreenRequested:")
         doFullscreen(true)
     }
 
     override fun onFullscreenExitRequested() {
-
-        Log.i("TAG", "gIOKLL1 onFullscreenExitRequested:")
         doFullscreen(false)
     }
 
@@ -32,10 +27,6 @@ open class ZoomHandler(var mPlayerView: JWPlayerView) : FullscreenHandler {
         widthDp = mPlayerView.resources.displayMetrics.run { widthPixels / density }
         heightDp = mPlayerView.resources.displayMetrics.run { heightPixels / density }
 
-
-
-        Log.i("TAG", "gIOKLL11 doFullscreen: ${widthDp.toString()} ${heightDp.toString()}")
-
         if (fullscreen) {
             mFullscreenParams = fullscreenLayoutParams(mDefaultParams)
             mPlayerView.layoutParams = mFullscreenParams
@@ -45,7 +36,6 @@ open class ZoomHandler(var mPlayerView: JWPlayerView) : FullscreenHandler {
         mPlayerView.requestLayout()
         mPlayerView.postInvalidate()
 
-        Log.i("TAG", "gIOKLL1 doFullscreen: ${mFullscreenParams.toString()} ${mDefaultParams.toString()}")
     }
 
     /**
@@ -72,7 +62,6 @@ open class ZoomHandler(var mPlayerView: JWPlayerView) : FullscreenHandler {
 //        }
         params!!.height = ViewGroup.LayoutParams.MATCH_PARENT
         params.width = ViewGroup.LayoutParams.MATCH_PARENT
-        Log.i("TAG", "gIOKLL1 fullscreenLayoutParams: ${params!!.height} ${ViewGroup.LayoutParams.MATCH_PARENT}")
         return params
     }
 
